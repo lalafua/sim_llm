@@ -1,40 +1,53 @@
 import google.generativeai as genai
 import rclpy, os
-from rclpy.node import Node
 import absl.logging
+import json
+import std_msgs
 
-# Initialize the logger
+# Initialize the absl logger for gemini
 absl.logging.set_verbosity(absl.logging.INFO)
 absl.logging.use_absl_handler()
 
-class NLPNode():
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    PROMPT = """
-        prompt: Hello Gemini! You will receive a text command from a robot. You need to convert it to a json string."
-        prompt: find the plastic bottle.
-            answer:[
-                "commands":{
-                    "command": "find",
-                    "goal":"plastic bottle"
-                }
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+PROMPT = """
+    prompt: Hello Gemini! You will receive a text command from a robot. You need to convert it to a json string."
+    prompt: find the plastic bottle.
+        answer:{
+            "commands":[{
+                "command": "find",
+                "parms":{
+                    "goal":"red boll",
+                    }
+            },
             ]
-        prompt: find the red boll.
-            answer:[
-                "commands":{
-                    "command": "find",
-                    "goal":"red boll"
+        }
+    prompt: find the red boll.
+        answer:{
+            "commands":[{
+                "command": "find",
+                "parms":{
+                    "goal":"red boll",
+                    }
                 }
+            },
             ]
-        prompt: find the phone.
-            answer:[
-                "commands":{
-                    "command": "find",
-                    "goal":"phone"
+        }
+    prompt: find the phone.
+        answer:{
+            "commands":[{
+                "command": "find",
+                "parms":{
+                    "goal":"phone",
+                    }
                 }
+            },
             ]
-    """
+        }
+"""
 
-    def __init__(self):       
+class NLPNode(rclpy.Node):
+    def __init__(self, name):
+        super().__init__(name)       
         genai.configure(api_key=self.GEMINI_API_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
 
@@ -46,7 +59,13 @@ class NLPNode():
                 temperature = 0.1,
             )
         )
-        return response.text
+        
+        try:
+            json_response = json.loads(response.text)
+            return json_response
+        except json.JSONDecodeError:
+            
+            return None
 
 def main(args=None):
     nlp_node = NLPNode()

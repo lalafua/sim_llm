@@ -10,6 +10,9 @@
   <depend>rclpy</depend>
   <depend>os</depend>
   <depend>google.generativeai</depend>
+  <depend>absl.logging</depend>
+  <depend>json</depend>
+
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
