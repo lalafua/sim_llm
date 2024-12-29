@@ -1,8 +1,8 @@
 import google.generativeai as genai
-import rclpy, os
+import rclpy, os, threading
 import absl.logging
-import json
-import std_msgs
+from std_msgs.msg import String
+from rclpy.node import Node
 
 # Initialize the absl logger for gemini
 absl.logging.set_verbosity(absl.logging.INFO)
@@ -45,13 +45,32 @@ PROMPT = """
         }
 """
 
-class NLPNode(rclpy.Node):
+class NLPNode(Node):
     def __init__(self, name):
-        super().__init__(name)       
-        genai.configure(api_key=self.GEMINI_API_KEY)
+        # Initialize the node
+        super().__init__(name)
+        self.get_logger().info("Node {} has been created.".format(name))      
+        self.command_publisher_ = self.create_publisher(msg_type=String, topic="nlp", qos_profile=10)
+        self.get_logger().info("Topic nlp has been created.")
+        self.msg = String()
+
+        # Initialize the gemini model
+        genai.configure(api_key=GEMINI_API_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
 
+         # Start a thread to wait for user input
+        self.input_thread = threading.Thread(target=self.wait_for_input)
+        self.input_thread.daemon = True
+        self.input_thread.start()
+    
     def gem_genai(self, prompt):
+        """
+        This function uses the gemini model to generate a response to a prompt.
+        
+        parameters: prompt: str
+        return: response: str
+        """
+
         response = self.model.generate_content(
             contents=prompt,
             generation_config = genai.GenerationConfig(
@@ -59,31 +78,26 @@ class NLPNode(rclpy.Node):
                 temperature = 0.1,
             )
         )
-        
-        try:
-            json_response = json.loads(response.text)
-            return json_response
-        except json.JSONDecodeError:
-            
-            return None
+        return response.text
+    
+    def wait_for_input(self):
+        """
+        This function waits for user input and publishes the input to the nlp topic.
+        """
+
+        while rclpy.ok():
+            user_input = input("Enter a command: ")
+            user_input = PROMPT + user_input
+            self.msg.data = self.gem_genai(user_input)
+            self.command_publisher_.publish(self.msg)
+            self.get_logger().info("Data has been published to the topic nlp: \n{}".format(self.msg.data))
+
 
 def main(args=None):
-    nlp_node = NLPNode()
-    while True:
-        myinput = nlp_node.PROMPT + input("Enter a command: ")
-        completion = nlp_node.gem_genai(myinput)
-        print(completion)
+    rclpy.init(args=args)
+    nlp_node = NLPNode("nlp_llm")
+    rclpy.spin(nlp_node)
+    rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
-
-# def main(args=None):
-#     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-#     rclpy.init(args=args)
-#     genai.configure(api_key=GEMINI_API_KEY)
-#     model = genai.GenerativeModel("gemini-1.5-flash")
-#     response = model.generate_content("explain how ai works")
-#     node = Node("nlp_llm")
-#     node.get_logger().info(response.text)
-#     rclpy.spin(node)
-#     node.shutdown()
