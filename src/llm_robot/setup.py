@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'nlp_llm'
+package_name = 'llm_robot'
 
 setup(
     name=package_name,
@@ -25,7 +25,7 @@ setup(
     #tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'nlp_llm = nlp_llm.nlp_llm:main'
+            'llm_nlp = llm_robot.llm_nlp:main'
         ],
     },
 )
