@@ -10,12 +10,12 @@ class TurtleNode(Node):
         super().__init__(name)
         self.get_logger().info("Node {} has been created.".format(name))
 
-        # Create publisher to control turtlebot
+        # Create publisher to control turtle
         self.turtle_control_publisher_ = self.create_publisher(Twist, '/turtle1/cmd_vel', 10)
         self.get_logger().info("Publisher 'cmd_vel' has been created.")
         self.vel_msg = Twist()
 
-        # Create subscriber to get turtlebot pose
+        # Create subscriber to get turtle pose
         self.turtle_pose_subscription_ = self.create_subscription(Pose, '/turtle1/pose', self.pose_callback, 10)
         self.get_logger().info("Node has subscribed to '/turtle1/pose' ")
         self.current_pose = Pose()
@@ -62,7 +62,6 @@ class TurtleNode(Node):
             self.vel_msg.angular.z = 4 * (math.atan2(target_pose.position.y - self.current_pose.position.y, target_pose.position.x - self.current_pose.position.x) - self.current_pose.orientation.z)
 
             self.turtle_control_publisher_.publish(self.vel_msg)
-        self.get_logger().info(f'Moving to goal: ({target_x}, {target_y})')
 
         self.stop()
     
@@ -78,6 +77,8 @@ class TurtleNode(Node):
         stop the turtlebot
         """
 
+        self.vel_msg.linear.x = 0.0
+        self.vel_msg.angular.z = 0.0
         self.turtle_control_publisher_.publish(self.vel_msg)
         self.get_logger().info("Turtle has stopped.")
 
@@ -85,6 +86,11 @@ class TurtleNode(Node):
         """
         control the turtlebot to cruises
         """
+
+        self.move_to_target(0.0, 5.0)
+        self.move_to_target(5.0, 5.0)
+        self.move_to_target(5.0, 0.0)
+        self.move_to_target(0.0, 0.0)
     
     def handle_camera(self, msg):
         """
@@ -93,7 +99,7 @@ class TurtleNode(Node):
         Args:
             msg (String): the message from 'camera' node
         """
-
+        self.recognize_goal = msg.data
         self.get_logger().info("Received: {}".format(msg.data))
 
     def handle_request(self, request, response):
@@ -148,6 +154,14 @@ class TurtleNode(Node):
             goal (str): the goal to find
         """
 
+        while self.recognize_goal != goal:
+            self.cruises()
+            self.get_logger().info("Turtle is cruising.")
+        
+        if self.recognize_goal == goal:
+            self.stop()
+            self.get_logger().info("Turtle has found the goal.")
+            self.move_to_target(0.0, 0.0)
 
         
 

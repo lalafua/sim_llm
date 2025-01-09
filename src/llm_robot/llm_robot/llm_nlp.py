@@ -1,12 +1,9 @@
 from openai import OpenAI
 import rclpy, os, threading
-import absl.logging
+
 from rclpy.node import Node
 from my_interfaces.srv import Command
 
-# # Initialize the absl logger for deepseek
-# absl.logging.set_verbosity(absl.logging.INFO)
-# absl.logging.use_absl_handler()
 
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 PROMPT = """
@@ -88,7 +85,7 @@ class NLPNode(Node):
             ],
             stream=False
         )
-        print(response.choices[0].message.content)
+        
         return response.choices[0].message.content
     
     def wait_for_input(self):
