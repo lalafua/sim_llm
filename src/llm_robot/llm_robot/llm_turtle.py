@@ -70,8 +70,6 @@ class TurtleNode(Node):
                 angle = math.atan2(distance_y, distance_x)
                 angular_diff = angle - self.current_pose.theta  
 
-            angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
-            
             # Rotate to the target direction
             while abs(angular_diff) > 0.01:
                 with self.pose_lock:
@@ -94,15 +92,8 @@ class TurtleNode(Node):
                 time.sleep(0.1)
         
         self.stop()
-        self.get_logger().info("Turtle has reached {}".format(target_pose))
+        self.get_logger().info("Turtle has reached {}".format(self.current_pose))
         
-    
-    def get_distance(self, pose1, pose2):
-        """
-        Calculate the distance between two positions
-        """
-
-        return math.sqrt((pose1.x - pose2.x)**2 + (pose1.y - pose2.y)**2)   
 
     def stop(self):
         """
@@ -144,7 +135,10 @@ class TurtleNode(Node):
 
         try:
             self.parser_map(request.command)
-            response.is_success = True
+            if self.is_find: 
+                response.is_success = True
+            else:
+                response.is_success = False
         except KeyError as e:
             self.get_logger().error("Key error: {}".format(e))
             response.is_success = False 
@@ -182,6 +176,8 @@ class TurtleNode(Node):
                 command_map[command](parms)
      
      
+    # ...existing code...
+
     def find(self, goal):
         """
         find the goal
@@ -189,9 +185,34 @@ class TurtleNode(Node):
         Args:
             goal (str): the goal to find
         """
+
+        self.is_find = False    
+
+        # Define fixed patrol points
+        patrol_points = [
+            (1.0, 1.0),
+            (9.0, 1.0),
+            (9.0, 9.0),
+            (1.0, 9.0)
+        ]
         
-        if goal != self.recognized_goal:
-            
+        # Store the original position
+        original_position = (self.current_pose.x, self.current_pose.y)
+
+        for point in patrol_points:
+            if goal == self.recognized_goal:
+                break
+            self.move_to_target(point[0], point[1])
+            time.sleep(1)  
+
+        # If goal is found, return to the original position
+        if goal == self.recognized_goal:
+            self.move_to_target(original_position[0], original_position[1])
+            self.get_logger().info("Goal found and returned to original position.")
+            self.is_find = True
+        else:
+            self.get_logger().info("Goal not found during patrol.")
+            self.is_find = False
 
 
 
