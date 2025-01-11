@@ -1,7 +1,8 @@
-import rclpy, json, math
+import rclpy, json, math, time, threading
 from rclpy.node import Node
 from my_interfaces.srv import Command
-from geometry_msgs.msg import Twist, Pose
+from geometry_msgs.msg import Twist
+from turtlesim.msg import Pose
 from std_msgs.msg import String
 
 
@@ -19,13 +20,15 @@ class TurtleNode(Node):
         self.turtle_pose_subscription_ = self.create_subscription(Pose, '/turtle1/pose', self.pose_callback, 10)
         self.get_logger().info("Node has subscribed to '/turtle1/pose' ")
         self.current_pose = Pose()
+        self.pose_lock = threading.Lock()
 
         # Create subscriber to get camera message   
-        self.camera_subscriber_ = self.create_subscription(String, "/camera/recognize", self.handle_camera, 10)
-        self.get_logger().info("Node has subscribed to '/camera/recognize' ")  
+        self.camera_subscriber_ = self.create_subscription(String, "/camera/recognized", self.handle_camera, 10)
+        self.get_logger().info("Node has subscribed to '/camera/recognized' ")  
+        self.recognized_goal = ""
 
         # Create server to receive command
-        self.command_server_ = self.create_service(Command, 'nlp/nlp_cmd', self.handle_request)
+        self.command_server_ = self.create_service(Command, 'llm_nlp/cmd', self.handle_request)
         self.get_logger().info("Service 'nlp/nlp_cmd' has been created.")
 
     def pose_callback(self, msg):
@@ -38,10 +41,9 @@ class TurtleNode(Node):
         Returns:
             None
         """
+        with self.pose_lock:
+            self.current_pose = msg
 
-        self.current_pose = msg
-        self.get_logger().info("turtle pose: {}".format(self.current_pose))
-    
     def move_to_target(self, target_x, target_y):
         """
         control the turtlebot to move to target
@@ -52,25 +54,55 @@ class TurtleNode(Node):
         """
         
         target_pose = Pose()
-        target_pose.position.x = target_x
-        target_pose.position.y = target_y
+        target_pose.x = target_x
+        target_pose.y = target_y
 
-        distance_tolerance = 0.1
 
-        while self.get_distance(self.current_pose, target_pose) >= distance_tolerance:
-            self.vel_msg.linear.x = 1.5 * self.get_distance(self.current_pose, target_pose)
-            self.vel_msg.angular.z = 4 * (math.atan2(target_pose.position.y - self.current_pose.position.y, target_pose.position.x - self.current_pose.position.x) - self.current_pose.orientation.z)
+        while True:
+            with self.pose_lock:
+                distance_x = target_pose.x - self.current_pose.x
+                distance_y = target_pose.y - self.current_pose.y
+                distance = math.sqrt(distance_x**2 + distance_y**2)
+                
+                if distance < 0.1:
+                    break
+                
+                angle = math.atan2(distance_y, distance_x)
+                angular_diff = angle - self.current_pose.theta  
 
-            self.turtle_control_publisher_.publish(self.vel_msg)
+            angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
+            
+            # Rotate to the target direction
+            while abs(angular_diff) > 0.01:
+                with self.pose_lock:
+                    angular_diff = angle - self.current_pose.theta
+                    angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
+                self.vel_msg.linear.x = 0.0
+                self.vel_msg.angular.z = angular_diff
+                self.turtle_control_publisher_.publish(self.vel_msg)
+                time.sleep(0.1)
 
+            # Move straight to the target
+            while distance > 0.1:
+                with self.pose_lock:
+                    distance_x = target_pose.x - self.current_pose.x
+                    distance_y = target_pose.y - self.current_pose.y
+                    distance = math.sqrt(distance_x**2 + distance_y**2)
+                self.vel_msg.linear.x = min(1.5, distance)
+                self.vel_msg.angular.z = 0.0
+                self.turtle_control_publisher_.publish(self.vel_msg)
+                time.sleep(0.1)
+        
         self.stop()
+        self.get_logger().info("Turtle has reached {}".format(target_pose))
+        
     
     def get_distance(self, pose1, pose2):
         """
         Calculate the distance between two positions
         """
 
-        return math.sqrt((pose1.position.x - pose2.position.x)**2 + (pose1.position.y - pose2.position.y)**2)   
+        return math.sqrt((pose1.x - pose2.x)**2 + (pose1.y - pose2.y)**2)   
 
     def stop(self):
         """
@@ -82,15 +114,7 @@ class TurtleNode(Node):
         self.turtle_control_publisher_.publish(self.vel_msg)
         self.get_logger().info("Turtle has stopped.")
 
-    def cruises(self):
-        """
-        control the turtlebot to cruises
-        """
 
-        self.move_to_target(0.0, 5.0)
-        self.move_to_target(5.0, 5.0)
-        self.move_to_target(5.0, 0.0)
-        self.move_to_target(0.0, 0.0)
     
     def handle_camera(self, msg):
         """
@@ -99,7 +123,7 @@ class TurtleNode(Node):
         Args:
             msg (String): the message from 'camera' node
         """
-        self.recognize_goal = msg.data
+        self.recognized_goal = msg.data
         self.get_logger().info("Received: {}".format(msg.data))
 
     def handle_request(self, request, response):
@@ -114,9 +138,19 @@ class TurtleNode(Node):
             response (Command.Response): response to 'llm_nlp' node
         """
 
+        if not request.command:
+            self.get_logger().error("Received empty command.") 
+            return
+
         try:
             self.parser_map(request.command)
             response.is_success = True
+        except KeyError as e:
+            self.get_logger().error("Key error: {}".format(e))
+            response.is_success = False 
+        except json.JSONDecodeError as e:   
+            self.get_logger().error("Json decode error: {}".format(e))
+            response.is_success = False 
         except Exception as e:
             self.get_logger().error("Error: {}".format(e))
             response.is_success = False
@@ -134,18 +168,20 @@ class TurtleNode(Node):
             None
         """
 
-        commands = json.loads(cmd)['answer']['commands']
+        commands = json.loads(cmd)["commands"]
+        print(commands) 
         
+        command_map = {
+            "find": lambda parms : self.find(parms["goal"])
+        }
+
         for item in commands:
-            command = item['command']
-            parms = item['parms']
+            command = item["command"]
+            parms = item["parms"]
             if command in command_map:
                 command_map[command](parms)
-
-        command_map = {
-            "find": lambda parms : self.find(parms['goal'])
-        }
-        
+     
+     
     def find(self, goal):
         """
         find the goal
@@ -153,17 +189,10 @@ class TurtleNode(Node):
         Args:
             goal (str): the goal to find
         """
-
-        while self.recognize_goal != goal:
-            self.cruises()
-            self.get_logger().info("Turtle is cruising.")
         
-        if self.recognize_goal == goal:
-            self.stop()
-            self.get_logger().info("Turtle has found the goal.")
-            self.move_to_target(0.0, 0.0)
+        if goal != self.recognized_goal:
+            
 
-        
 
 
 def main(args=None):

@@ -1,20 +1,19 @@
 from openai import OpenAI
-import rclpy, os, threading
-
+import rclpy, os, threading, json
 from rclpy.node import Node
 from my_interfaces.srv import Command
 
 
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 PROMPT = """
-    prompt: Hello Deepseek! You will receive a text command from a robot. You need to convert it to a json string."
+    prompt: Hello Deepseek! You will receive a text command from a robot. You need to convert it to a json string in plain text."
     prompt: find the plastic bottle.
         answer:{
             "commands":[
                 {
                     "command": "find",
                     "parms":{
-                        "goal":"red boll",
+                        "goal":"red boll"
                     }
                 },
             ]
@@ -25,7 +24,7 @@ PROMPT = """
                 {
                     "command": "find",
                     "parms":{
-                        "goal":"red boll",
+                        "goal":"red boll"
                     }
                 },
             ]
@@ -36,7 +35,7 @@ PROMPT = """
                 {
                     "command": "find",
                     "parms":{
-                        "goal":"phone",
+                        "goal":"phone"
                     }
                 },
             ]
@@ -49,7 +48,7 @@ class NLPNode(Node):
         super().__init__(name)
         self.get_logger().info("Node {} has been created.".format(name))
         
-        self.command_client_ = self.create_client(Command, "/nlp/nlp_cmd")
+        self.command_client_ = self.create_client(Command, "/llm_nlp/cmd")
         self.request = Command.Request()
 
         # Initialize the gemini model
@@ -85,8 +84,11 @@ class NLPNode(Node):
             ],
             stream=False
         )
+
+        response_content = response.choices[0].message.content  
+        response_content = response_content.replace("```json", "").replace("```", "").strip()
         
-        return response.choices[0].message.content
+        return response_content
     
     def wait_for_input(self):
         """
@@ -99,7 +101,10 @@ class NLPNode(Node):
 
         user_input = input("Enter a command: ")
         
-        self.request.command = self.dps_genai(user_input)
+        request_json = self.dps_genai(user_input)
+
+        self.request.command = request_json
+        self.get_logger().info("Request: \n{}".format(self.request.command))    
 
         future = self.command_client_.call_async(self.request)
         future.add_done_callback(self.handle_response)
@@ -115,7 +120,7 @@ class NLPNode(Node):
             if response.is_success:
                 self.wait_for_input()
             else:
-                self.get_logger().fatal("oops! something went wrong")
+                self.get_logger().fatal("Oops! something went wrong")
                 self.wait_for_input()
         except Exception as e:
             self.get_logger().error("Service call failed {}".format(e))
