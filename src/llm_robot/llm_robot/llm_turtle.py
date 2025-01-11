@@ -4,6 +4,8 @@ from my_interfaces.srv import Command
 from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose
 from std_msgs.msg import String
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
 
 
 class TurtleNode(Node):
@@ -11,24 +13,41 @@ class TurtleNode(Node):
         super().__init__(name)
         self.get_logger().info("Node {} has been created.".format(name))
 
+        self.call_backgroup_ = MutuallyExclusiveCallbackGroup()
+        
         # Create publisher to control turtle
-        self.turtle_control_publisher_ = self.create_publisher(Twist, '/turtle1/cmd_vel', 10)
+        self.turtle_control_publisher_ = self.create_publisher(
+            Twist,
+            '/turtle1/cmd_vel',
+            10)
         self.get_logger().info("Publisher 'cmd_vel' has been created.")
         self.vel_msg = Twist()
 
         # Create subscriber to get turtle pose
-        self.turtle_pose_subscription_ = self.create_subscription(Pose, '/turtle1/pose', self.pose_callback, 10)
+        self.turtle_pose_subscription_ = self.create_subscription(
+            Pose,
+            '/turtle1/pose',
+            self.pose_callback,
+            10
+            callback_group=self.call_backgroup_)    
         self.get_logger().info("Node has subscribed to '/turtle1/pose' ")
         self.current_pose = Pose()
-        self.pose_lock = threading.Lock()
 
         # Create subscriber to get camera message   
-        self.camera_subscriber_ = self.create_subscription(String, "/camera/recognized", self.handle_camera, 10)
+        self.camera_subscriber_ = self.create_subscription(
+            String,
+            "/camera/recognized",
+            self.handle_camera,
+            10,
+            callback_group=self.call_backgroup_)    
         self.get_logger().info("Node has subscribed to '/camera/recognized' ")  
         self.recognized_goal = ""
 
         # Create server to receive command
-        self.command_server_ = self.create_service(Command, 'llm_nlp/cmd', self.handle_request)
+        self.command_server_ = self.create_service(
+            Command,
+            'llm_nlp/cmd',
+            self.handle_request)
         self.get_logger().info("Service 'nlp/nlp_cmd' has been created.")
 
     def pose_callback(self, msg):
@@ -41,8 +60,8 @@ class TurtleNode(Node):
         Returns:
             None
         """
-        with self.pose_lock:
-            self.current_pose = msg
+        self.current_pose = msg
+        self.get_logger().info("Received: {}".format(self.current_pose))    
 
     def move_to_target(self, target_x, target_y):
         """
@@ -104,8 +123,6 @@ class TurtleNode(Node):
         self.vel_msg.angular.z = 0.0
         self.turtle_control_publisher_.publish(self.vel_msg)
         self.get_logger().info("Turtle has stopped.")
-
-
     
     def handle_camera(self, msg):
         """
