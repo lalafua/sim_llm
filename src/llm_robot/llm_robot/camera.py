@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from rclpy.executors import MultiThreadedExecutor
 
 class cameraNode(Node):
     def __init__(self, name):
@@ -19,8 +20,16 @@ class cameraNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     camera_node = cameraNode("camera_node")
-    rclpy.spin(camera_node)
-    rclpy.shutdown()
+    executor = MultiThreadedExecutor()
+    executor.add_node(camera_node)
+
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass        
+    finally:
+        camera_node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

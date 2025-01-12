@@ -1,4 +1,4 @@
-import rclpy, json, math, time, queue, threading    
+import rclpy, json, math, time,threading    
 from rclpy.node import Node
 from my_interfaces.srv import Command
 from geometry_msgs.msg import Twist
