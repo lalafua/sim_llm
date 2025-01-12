@@ -26,6 +26,8 @@ setup(
         'console_scripts': [
             'llm_nlp = llm_robot.llm_nlp:main',
             'llm_turtle = llm_robot.llm_turtle:main',
+            'camera = llm_robot.camera:main',
+            'control_turtle = llm_robot.control_turtle:main',
         ],
     },
 )

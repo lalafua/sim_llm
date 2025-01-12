@@ -4,15 +4,16 @@ from std_msgs.msg import String
 
 class cameraNode(Node):
     def __init__(self, name):
-        super.__init__(name)
+        super().__init__(name)
         self.get_logger().info("Node {} has been created.".format(name))    
-        self.camera_publisher_ = self.create_publisher(msg_type=String, topic="/camera/recognize", qos_profile=10)
-        self.timer_ = self.create_timer(3.0, self.timer_callback)
+        self.camera_publisher_ = self.create_publisher(msg_type=String, topic="/camera/recognized", qos_profile=10)
+        self.timer_ = self.create_timer(20, self.timer_callback)
     
     def timer_callback(self):
         msg = String()
         msg.data = "bottle"
         self.camera_publisher_.publish(msg)
+        self.get_logger().info("Published to topic '/camera/recognized': '{}'".format(msg.data))
 
 
 def main(args=None):
