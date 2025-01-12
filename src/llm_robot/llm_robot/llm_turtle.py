@@ -1,4 +1,4 @@
-import rclpy, json, math, time, threading
+import rclpy, json, math, time, queue, threading    
 from rclpy.node import Node
 from my_interfaces.srv import Command
 from geometry_msgs.msg import Twist
@@ -9,38 +9,40 @@ from rclpy.executors import MultiThreadedExecutor
 
 
 class TurtleNode(Node):
-    def __init__(self, name):
+    def __init__(self, name):       
         super().__init__(name)
         self.get_logger().info("Node {} has been created.".format(name))
 
-        self.call_backgroup_ = MutuallyExclusiveCallbackGroup()
-        
-        # Create publisher to control turtle
-        self.turtle_control_publisher_ = self.create_publisher(
-            Twist,
-            '/turtle1/cmd_vel',
-            10)
-        self.get_logger().info("Publisher 'cmd_vel' has been created.")
-        self.vel_msg = Twist()
+        self.callback_group_ = MutuallyExclusiveCallbackGroup()
 
         # Create subscriber to get turtle pose
         self.turtle_pose_subscription_ = self.create_subscription(
             Pose,
             '/turtle1/pose',
             self.pose_callback,
-            10
-            callback_group=self.call_backgroup_)    
+            10,
+            callback_group=self.callback_group_)    
         self.get_logger().info("Node has subscribed to '/turtle1/pose' ")
-        self.current_pose = Pose()
 
         # Create subscriber to get camera message   
         self.camera_subscriber_ = self.create_subscription(
             String,
             "/camera/recognized",
-            self.handle_camera,
+            self.camera_callback,
             10,
-            callback_group=self.call_backgroup_)    
+            callback_group=self.callback_group_)    
         self.get_logger().info("Node has subscribed to '/camera/recognized' ")  
+
+        self.lock = threading.Lock()
+
+                # Create publisher to control turtle
+        self.turtle_control_publisher_ = self.create_publisher(
+            Twist,
+            '/turtle1/cmd_vel',
+            10)
+        self.get_logger().info("Publisher 'cmd_vel' has been created.")
+        self.vel_msg = Twist()
+        self.current_pose = Pose()
         self.recognized_goal = ""
 
         # Create server to receive command
@@ -50,6 +52,7 @@ class TurtleNode(Node):
             self.handle_request)
         self.get_logger().info("Service 'nlp/nlp_cmd' has been created.")
 
+    
     def pose_callback(self, msg):
         """
         get turtle pose
@@ -60,9 +63,24 @@ class TurtleNode(Node):
         Returns:
             None
         """
-        self.current_pose = msg
-        self.get_logger().info("Received: {}".format(self.current_pose))    
 
+        with self.lock:
+            self.current_pose = msg
+            self.get_logger().info("Current pose: {}".format(self.current_pose))
+            time.sleep(0.3)    
+          
+
+    def camera_callback(self, msg):
+        """
+        callback function to handle the message from 'camera' node
+
+        Args:
+            msg (String): the message from 'camera' node
+        """
+
+        with self.lock:
+            self.recognized_goal = msg
+            
     def move_to_target(self, target_x, target_y):
         """
         control the turtlebot to move to target
@@ -76,9 +94,8 @@ class TurtleNode(Node):
         target_pose.x = target_x
         target_pose.y = target_y
 
-
         while True:
-            with self.pose_lock:
+            if self.current_pose is not None:   
                 distance_x = target_pose.x - self.current_pose.x
                 distance_y = target_pose.y - self.current_pose.y
                 distance = math.sqrt(distance_x**2 + distance_y**2)
@@ -91,20 +108,20 @@ class TurtleNode(Node):
 
             # Rotate to the target direction
             while abs(angular_diff) > 0.01:
-                with self.pose_lock:
-                    angular_diff = angle - self.current_pose.theta
-                    angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
+                angular_diff = angle - self.current_pose.theta
+                angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
+                
                 self.vel_msg.linear.x = 0.0
                 self.vel_msg.angular.z = angular_diff
                 self.turtle_control_publisher_.publish(self.vel_msg)
                 time.sleep(0.1)
 
             # Move straight to the target
-            while distance > 0.1:
-                with self.pose_lock:
-                    distance_x = target_pose.x - self.current_pose.x
-                    distance_y = target_pose.y - self.current_pose.y
-                    distance = math.sqrt(distance_x**2 + distance_y**2)
+            while distance > 0.1:     
+                distance_x = target_pose.x - self.current_pose.x
+                distance_y = target_pose.y - self.current_pose.y
+                distance = math.sqrt(distance_x**2 + distance_y**2)
+                
                 self.vel_msg.linear.x = min(1.5, distance)
                 self.vel_msg.angular.z = 0.0
                 self.turtle_control_publisher_.publish(self.vel_msg)
@@ -124,15 +141,6 @@ class TurtleNode(Node):
         self.turtle_control_publisher_.publish(self.vel_msg)
         self.get_logger().info("Turtle has stopped.")
     
-    def handle_camera(self, msg):
-        """
-        callback function to handle the message from 'camera' node
-
-        Args:
-            msg (String): the message from 'camera' node
-        """
-        self.recognized_goal = msg.data
-        self.get_logger().info("Received: {}".format(msg.data))
 
     def handle_request(self, request, response):
         """
@@ -147,15 +155,13 @@ class TurtleNode(Node):
         """
 
         if not request.command:
-            self.get_logger().error("Received empty command.") 
-            return
+            self.get_logger().error("Received empty command.")
+            response.is_success = False  
+            return  response
 
         try:
             self.parser_map(request.command)
-            if self.is_find: 
-                response.is_success = True
-            else:
-                response.is_success = False
+            response.is_success = self.is_find  
         except KeyError as e:
             self.get_logger().error("Key error: {}".format(e))
             response.is_success = False 
@@ -191,9 +197,8 @@ class TurtleNode(Node):
             parms = item["parms"]
             if command in command_map:
                 command_map[command](parms)
-     
-     
-    # ...existing code...
+            else:
+                self.get_logger().error("Command {} not found.".format(command))
 
     def find(self, goal):
         """
@@ -212,32 +217,45 @@ class TurtleNode(Node):
             (9.0, 9.0),
             (1.0, 9.0)
         ]
-        
+            
         # Store the original position
         original_position = (self.current_pose.x, self.current_pose.y)
 
-        for point in patrol_points:
-            if goal == self.recognized_goal:
-                break
-            self.move_to_target(point[0], point[1])
-            time.sleep(1)  
+        def patrol():
+            while not self.is_find:
+                for point in patrol_points:
+                    if goal == self.recognized_goal:
+                        self.is_find = True
+                        break
+                    self.move_to_target(point[0], point[1])
+                    time.sleep(1)  # Short sleep to avoid high CPU usage
 
-        # If goal is found, return to the original position
-        if goal == self.recognized_goal:
+                if not self.is_find:
+                    self.get_logger().info("Goal not found, continuing patrol.")
+
+            # If goal is found, return to the original position
             self.move_to_target(original_position[0], original_position[1])
             self.get_logger().info("Goal found and returned to original position.")
             self.is_find = True
-        else:
-            self.get_logger().info("Goal not found during patrol.")
-            self.is_find = False
 
-
+        # Start patrol in a new thread
+        self.patrol_thread = threading.Thread(target=patrol)
+        self.patrol_thread.start()
 
 def main(args=None):
     rclpy.init(args=args)
-    turtle_node = TurtleNode("llm_turtle")
-    rclpy.spin(turtle_node)
-    rclpy.shutdown()
+
+    node = TurtleNode("llm_turtle")
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
+
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass        
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
