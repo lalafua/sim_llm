@@ -45,6 +45,10 @@ class TurtleNode(Node):
         self.current_pose = Pose()
         self.recognized_goal = ""
 
+        self.parser_success = False
+        self.parser_thread = None
+        self.parser_event = threading.Event()
+
         # Create server to receive command
         self.command_server_ = self.create_service(
             Command,
@@ -52,7 +56,6 @@ class TurtleNode(Node):
             self.handle_request)
         self.get_logger().info("Service 'nlp/nlp_cmd' has been created.")
 
-    
     def pose_callback(self, msg):
         """
         get turtle pose
@@ -65,11 +68,8 @@ class TurtleNode(Node):
         """
 
         with self.lock:
-            self.current_pose = msg
-            self.get_logger().info("Current pose: {}".format(self.current_pose))
-            time.sleep(0.3)    
+            self.current_pose = msg  
           
-
     def camera_callback(self, msg):
         """
         callback function to handle the message from 'camera' node
@@ -79,15 +79,17 @@ class TurtleNode(Node):
         """
 
         with self.lock:
-            self.recognized_goal = msg
+            self.recognized_goal = msg.data
+            self.get_logger().info("Recognized goal: {}".format(self.recognized_goal))  
             
-    def move_to_target(self, target_x, target_y):
+    def move_to_target(self, target_x, target_y, goal=""):
         """
         control the turtlebot to move to target
 
         Args:
             target_x (float): target x
             target_y (float): target y
+            goal (str): the goal to find
         """
         
         target_pose = Pose()
@@ -108,6 +110,10 @@ class TurtleNode(Node):
 
             # Rotate to the target direction
             while abs(angular_diff) > 0.01:
+                if goal == self.recognized_goal:
+                    self.parser_success = True
+                    self.parser_event.set()
+                    return
                 angular_diff = angle - self.current_pose.theta
                 angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
                 
@@ -117,7 +123,11 @@ class TurtleNode(Node):
                 time.sleep(0.1)
 
             # Move straight to the target
-            while distance > 0.1:     
+            while distance > 0.1:
+                if goal == self.recognized_goal:
+                    self.parser_success = True
+                    self.parser_event.set()
+                    return     
                 distance_x = target_pose.x - self.current_pose.x
                 distance_y = target_pose.y - self.current_pose.y
                 distance = math.sqrt(distance_x**2 + distance_y**2)
@@ -161,7 +171,8 @@ class TurtleNode(Node):
 
         try:
             self.parser_map(request.command)
-            response.is_success = self.is_find  
+            self.parser_event.wait()
+            response.is_success = self.parser_success 
         except KeyError as e:
             self.get_logger().error("Key error: {}".format(e))
             response.is_success = False 
@@ -185,6 +196,7 @@ class TurtleNode(Node):
             None
         """
 
+
         commands = json.loads(cmd)["commands"]
         print(commands) 
         
@@ -207,8 +219,9 @@ class TurtleNode(Node):
         Args:
             goal (str): the goal to find
         """
-
-        self.is_find = False    
+   
+        self.parser_success = False 
+        self.parser_event.clear()
 
         # Define fixed patrol points
         patrol_points = [
@@ -222,21 +235,20 @@ class TurtleNode(Node):
         original_position = (self.current_pose.x, self.current_pose.y)
 
         def patrol():
-            while not self.is_find:
+            while not self.parser_success:
                 for point in patrol_points:
-                    if goal == self.recognized_goal:
-                        self.is_find = True
+                    if self.parser_success:
                         break
-                    self.move_to_target(point[0], point[1])
-                    time.sleep(1)  # Short sleep to avoid high CPU usage
+                    self.move_to_target(point[0], point[1], goal)
 
-                if not self.is_find:
+                if not self.parser_success:
                     self.get_logger().info("Goal not found, continuing patrol.")
 
             # If goal is found, return to the original position
             self.move_to_target(original_position[0], original_position[1])
             self.get_logger().info("Goal found and returned to original position.")
-            self.is_find = True
+            self.parser_success = True
+            self.parser_event.set()
 
         # Start patrol in a new thread
         self.patrol_thread = threading.Thread(target=patrol)

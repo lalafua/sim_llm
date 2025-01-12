@@ -7,7 +7,7 @@ class cameraNode(Node):
         super().__init__(name)
         self.get_logger().info("Node {} has been created.".format(name))    
         self.camera_publisher_ = self.create_publisher(msg_type=String, topic="/camera/recognized", qos_profile=10)
-        self.timer_ = self.create_timer(80.0, self.timer_callback)
+        self.timer_ = self.create_timer(20, self.timer_callback)
     
     def timer_callback(self):
         msg = String()
