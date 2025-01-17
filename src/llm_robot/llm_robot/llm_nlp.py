@@ -16,7 +16,7 @@ PROMPT = """
                     "parms":{
                         "goal":"red boll"
                     }
-                },
+                }
             ]
         }
     prompt: find the red boll.
@@ -27,7 +27,7 @@ PROMPT = """
                     "parms":{
                         "goal":"red boll"
                     }
-                },
+                }
             ]
         }
     prompt: find the phone.
@@ -38,7 +38,7 @@ PROMPT = """
                     "parms":{
                         "goal":"phone"
                     }
-                },
+                }
             ]
         }
 """
