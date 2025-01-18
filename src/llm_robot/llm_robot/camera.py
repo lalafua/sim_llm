@@ -18,6 +18,7 @@ class cameraNode(Node):
         # msg.data = "bottle"
         if self.detection["class_name"]:
             msg.data = self.detection["class_name"]
+            self.detection["class_name"] = []
             self.camera_publisher_.publish(msg)
             self.get_logger().info("Published to topic '/camera/recognized': '{}'".format(msg.data))
     

@@ -246,6 +246,7 @@ class TurtleNode(Node):
             # If goal is found, return to the original position
             self.move_to_target(original_position[0], original_position[1])
             self.get_logger().info("Goal found and returned to original position.")
+            self.get_logger().info("Position: {}".format(self.current_pose))
             self.parser_success = True
             self.parser_event.set()
 
