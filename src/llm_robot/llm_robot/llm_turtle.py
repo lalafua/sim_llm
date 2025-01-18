@@ -112,6 +112,7 @@ class TurtleNode(Node):
             while abs(angular_diff) > 0.01:
                 if goal == self.recognized_goal:
                     self.parser_success = True
+                    self.get_logger().info("Goal found at position: {}".format(self.current_pose))
                     self.parser_event.set()
                     return
                 angular_diff = angle - self.current_pose.theta
@@ -126,6 +127,7 @@ class TurtleNode(Node):
             while distance > 0.1:
                 if goal == self.recognized_goal:
                     self.parser_success = True
+                    self.get_logger().info("Goal found at position: {}".format(self.current_pose))
                     self.parser_event.set()
                     return     
                 distance_x = target_pose.x - self.current_pose.x
@@ -232,6 +234,7 @@ class TurtleNode(Node):
             
         # Store the original position
         original_position = (self.current_pose.x, self.current_pose.y)
+        self.get_logger().info("Original position: {}".format(original_position))   
 
         def patrol():
             while not self.parser_success:
@@ -245,7 +248,7 @@ class TurtleNode(Node):
 
             # If goal is found, return to the original position
             self.move_to_target(original_position[0], original_position[1])
-            self.get_logger().info("Goal found and returned to original position.")
+            self.get_logger().info("Returned to original position.")
             self.parser_success = True
             self.parser_event.set()
 

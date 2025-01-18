@@ -10,3 +10,5 @@ src/llm_robot/roboflow/train/images/*
 src/llm_robot/roboflow/train/labels/*
 src/llm_robot/roboflow/valid/images/*
 src/llm_robot/roboflow/valid/labels/*
+
+!src/llm_robot/roboflow/test
