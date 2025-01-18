@@ -1,4 +1,4 @@
-import rclpy, json, math, time, queue, threading    
+import rclpy, json, math, time,threading    
 from rclpy.node import Node
 from my_interfaces.srv import Command
 from geometry_msgs.msg import Twist
@@ -35,7 +35,7 @@ class TurtleNode(Node):
 
         self.lock = threading.Lock()
 
-                # Create publisher to control turtle
+        # Create publisher to control turtle
         self.turtle_control_publisher_ = self.create_publisher(
             Twist,
             '/turtle1/cmd_vel',
@@ -195,7 +195,6 @@ class TurtleNode(Node):
         Returns:
             None
         """
-
 
         commands = json.loads(cmd)["commands"]
         print(commands) 

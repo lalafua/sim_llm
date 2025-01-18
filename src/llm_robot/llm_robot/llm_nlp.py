@@ -1,7 +1,8 @@
 from openai import OpenAI
-import rclpy, os, threading, json
+import rclpy, os, threading
 from rclpy.node import Node
 from my_interfaces.srv import Command
+from rclpy.executors import MultiThreadedExecutor
 
 
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
@@ -15,7 +16,7 @@ PROMPT = """
                     "parms":{
                         "goal":"red boll"
                     }
-                },
+                }
             ]
         }
     prompt: find the red boll.
@@ -26,7 +27,7 @@ PROMPT = """
                     "parms":{
                         "goal":"red boll"
                     }
-                },
+                }
             ]
         }
     prompt: find the phone.
@@ -37,7 +38,7 @@ PROMPT = """
                     "parms":{
                         "goal":"phone"
                     }
-                },
+                }
             ]
         }
 """
@@ -129,8 +130,16 @@ class NLPNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     nlp_node = NLPNode("llm_nlp")
-    rclpy.spin(nlp_node)
-    rclpy.shutdown()
+    executor = MultiThreadedExecutor()
+    executor.add_node(nlp_node)
+
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass        
+    finally:
+        nlp_node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

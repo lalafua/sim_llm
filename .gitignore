@@ -2,4 +2,11 @@ build/
 install/
 log/
 
-test.*
+src/llm_robot/llm_robot/test.py
+
+src/llm_robot/roboflow/test/images/*
+src/llm_robot/roboflow/test/labels/*
+src/llm_robot/roboflow/train/images/*
+src/llm_robot/roboflow/train/labels/*
+src/llm_robot/roboflow/valid/images/*
+src/llm_robot/roboflow/valid/labels/*
