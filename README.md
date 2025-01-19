@@ -70,8 +70,15 @@ python3 -m venv .venv/
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-  
-3. 编译工程文件
+
+3. 设置环境变量
+
+```bash
+export DEEPSEEK_API_KEY = "<your DeepSeek api key>"
+export ROBOFLOW_API_KEY = "<your RoboFlow api key>"
+``` 
+
+4. 编译工程文件
   
 ```bash
 colcon build
