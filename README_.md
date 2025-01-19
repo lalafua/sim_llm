@@ -5,7 +5,7 @@
 `sim_llm` 是一个基于 `ROS2` 的仿真测试，使用当下热门的大语言模型控制 `turtle` 做出一些简单的行动。
   
 #### DEMO
-@import "assets/demo.gif"  
+![](assets/demo.gif)  
   
 #### 任务逻辑
 主体任务逻辑分三个 `node` 完成：
@@ -17,8 +17,9 @@
   
 - `camera node` ：识别节点。从摄像头捕获图像，使用 Roboflow 模型进行物体检测，然后将检测结果发布到 `/camera/recognized`。为了缓解识别图像造成的卡顿掉帧，通过多线程处理捕获操作和帧操作，同时也可以避免阻塞定时器的回调任务。
   
-@import "assets/rosgraph.dot"
 
+![](assets/rosgraph.png)  
+  
 #### 目录结构
 ```
 sim_llm/
@@ -99,5 +100,6 @@ ros2 run turtlesim turtlesim_node
 ```
   
 其中， `llm_nlp` 节点会在服务就绪后提示输入 `command` ，输入 `find the bottle` 后，就可以看到 turtle 正在寻找 bottle 了（其他指令还没有写，目前只有这一个，不过可以自己训练想要识别的目标）
+  
   
   
