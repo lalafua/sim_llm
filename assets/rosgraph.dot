@@ -1,0 +1,102 @@
+digraph graphname {
+	graph [bb="0,0,455.78,228",
+		compound=True,
+		rank=same,
+		rankdir=LR,
+		ranksep=0.2
+	];
+	node [label="\N"];
+	subgraph cluster___camera {
+		graph [bb="157.49,8,329.49,83",
+			compound=True,
+			label="/camera",
+			lheight=0.21,
+			lp="243.49,71.5",
+			lwidth=0.81,
+			rank=same,
+			rankdir=LR,
+			ranksep=0.2,
+			style=bold
+		];
+		t___camera__recognized	[URL=topic_3A__camera__recognized,
+			height=0.5,
+			label="/camera/recognized",
+			pos="243.49,34",
+			shape=box,
+			tooltip="topic:/camera/recognized",
+			width=2.1667];
+	}
+	subgraph cluster___turtle1 {
+		graph [bb="168.99,91,317.99,220",
+			compound=True,
+			label="/turtle1",
+			lheight=0.21,
+			lp="243.49,208.5",
+			lwidth=0.76,
+			rank=same,
+			rankdir=LR,
+			ranksep=0.2,
+			style=bold
+		];
+		t___turtle1__cmd_vel	[URL=topic_3A__turtle1__cmd_vel,
+			height=0.5,
+			label="/turtle1/cmd_vel",
+			pos="243.49,171",
+			shape=box,
+			tooltip="topic:/turtle1/cmd_vel",
+			width=1.8472];
+		t___turtle1__pose	[URL=topic_3A__turtle1__pose,
+			height=0.5,
+			label="/turtle1/pose",
+			pos="243.49,117",
+			shape=box,
+			tooltip="topic:/turtle1/pose",
+			width=1.5];
+	}
+	n___llm_turtle	[URL=__llm_turtle,
+		height=0.5,
+		label="/llm_turtle",
+		pos="396.63,117",
+		shape=ellipse,
+		tooltip="/llm_turtle",
+		width=1.6429];
+	t___camera__recognized -> n___llm_turtle	[edgetooltip="Subscription\nnode_name: /llm_turtle\ntopic_name: /camera/recognized\nQoS settings\n- reliability: reliable\n- durability: volatile\n- lifespan: 9223372036854775807 ns\n- deadline: 9223372036854775807 ns\n- liveliness: automatic\n- liveliness_lease_duration: 9223372036854775807 ns\n- avoid_ros_namespace_conventions: False",
+		penwidth=1,
+		pos="e,366.97,101.26 277.28,52.01 301.1,65.088 333.37,82.808 358.19,96.441"];
+	n___turtlesim	[URL=__turtlesim,
+		height=0.5,
+		label="/turtlesim",
+		pos="396.63,171",
+		shape=ellipse,
+		tooltip="/turtlesim",
+		width=1.5707];
+	t___turtle1__cmd_vel -> n___turtlesim	[edgetooltip="Subscription\nnode_name: /turtlesim\ntopic_name: /turtle1/cmd_vel\nQoS settings\n- reliability: reliable\n- durability: volatile\n- lifespan: 9223372036854775807 ns\n- deadline: 9223372036854775807 ns\n- liveliness: automatic\n- liveliness_lease_duration: 9223372036854775807 ns\n- avoid_ros_namespace_conventions: False",
+		penwidth=1,
+		pos="e,339.92,171 310.34,171 316.81,171 323.39,171 329.86,171"];
+	t___turtle1__pose -> n___llm_turtle	[edgetooltip="Subscription\nnode_name: /llm_turtle\ntopic_name: /turtle1/pose\nQoS settings\n- reliability: reliable\n- durability: volatile\n- lifespan: 9223372036854775807 ns\n- deadline: 9223372036854775807 ns\n- liveliness: automatic\n- liveliness_lease_duration: 9223372036854775807 ns\n- avoid_ros_namespace_conventions: False",
+		penwidth=1,
+		pos="e,337.43,117 297.77,117 307.3,117 317.34,117 327.22,117"];
+	n___llm_turtle -> t___turtle1__cmd_vel	[edgetooltip="Publisher\nnode_name: /llm_turtle\ntopic_name: /turtle1/cmd_vel\nQoS settings\n- reliability: reliable\n- durability: volatile\n- lifespan: 9223372036854775807 ns\n- deadline: 9223372036854775807 ns\n- liveliness: automatic\n- liveliness_lease_duration: 9223372036854775807 ns\n- avoid_ros_namespace_conventions: False",
+		penwidth=1,
+		pos="e,303.68,152.87 361.5,131.54 351.27,135.73 339.98,140.2 329.49,144 324.3,145.88 318.91,147.76 313.48,149.6"];
+	n___camera_node	[URL=__camera_node,
+		height=0.5,
+		label="/camera_node",
+		pos="74.743,34",
+		shape=ellipse,
+		tooltip="/camera_node",
+		width=2.0762];
+	n___camera_node -> t___camera__recognized	[edgetooltip="Publisher\nnode_name: /camera_node\ntopic_name: /camera/recognized\nQoS settings\n- reliability: reliable\n- durability: volatile\n- lifespan: 9223372036854775807 ns\n- deadline: 9223372036854775807 ns\n- liveliness: automatic\n- liveliness_lease_duration: 9223372036854775807 ns\n- avoid_ros_namespace_conventions: False",
+		penwidth=1,
+		pos="e,165.31,34 149.85,34 151.61,34 153.38,34 155.16,34"];
+	n___llm_nlp	[URL=__llm_nlp,
+		height=0.5,
+		label="/llm_nlp",
+		pos="74.743,88",
+		shape=ellipse,
+		tooltip="/llm_nlp",
+		width=1.3179];
+	n___turtlesim -> t___turtle1__pose	[edgetooltip="Publisher\nnode_name: /turtlesim\ntopic_name: /turtle1/pose\nQoS settings\n- reliability: reliable\n- durability: volatile\n- lifespan: 9223372036854775807 ns\n- deadline: 9223372036854775807 ns\n- liveliness: automatic\n- liveliness_lease_duration: 9223372036854775807 ns\n- avoid_ros_namespace_conventions: False",
+		penwidth=1,
+		pos="e,297.76,133.2 361.84,156.6 351.52,152.37 340.1,147.84 329.49,144 322.4,141.43 314.94,138.87 307.5,136.39"];
+}

@@ -249,8 +249,6 @@ class TurtleNode(Node):
             # If goal is found, return to the original position
             self.move_to_target(original_position[0], original_position[1])
             self.get_logger().info("Returned to original position.")
-            self.parser_success = True
-            self.parser_event.set()
 
         # Start patrol in a new thread
         self.patrol_thread = threading.Thread(target=patrol)
