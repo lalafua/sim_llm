@@ -1,33 +1,24 @@
 # sim_llm
-  
+
 ### 介绍
-  
+
 `sim_llm` 是一个基于 `ROS2` 的仿真测试，使用当下热门的大语言模型控制 `turtle` 做出一些简单的行动。
-  
+
 #### DEMO
-![](assets/demo.gif?0.2826461358270671 )  
-  
+@import "./assets/demo.gif"
+
 #### 任务逻辑
 主体任务逻辑分三个 `node` 完成：
-  
+
 - `llm_nlp node` ：自然语言处理节点。接收用户输入，调用 DeepSeek api ，通过给 AI 合适的 prompt 将自然语言转换为 Json 字符串，并将其作为服务请求发送到 `/llm_nlp/cmd` 服务。
     - 有一点需要说明的是，我创建了 `my_interfaces` 包用来规定服务请求的数据类型。
-  
+
 - `llm_turtle node` ：控制节点。订阅 `turtle1` 节点发布的 `turtle1/pose` 位置信息，订阅 `camera` 节点发布的 `/camera/recognized` 识别的目标信息，创建 publisher 发布到 `/turtle1/cmd_vel` 控制 turtle 移动。用于控制 turtle 执行巡逻任务，并通过相机识别目标。如果在巡逻过程中识别到目标，立即记录当前位置并打印信息。采用多线程处理巡逻任务和命令请求以及基本信息获取，确保各个功能之间不会互相影响，达到实时响应。
-  
+
 - `camera node` ：识别节点。从摄像头捕获图像，使用 Roboflow 模型进行物体检测，然后将检测结果发布到 `/camera/recognized`。为了缓解识别图像造成的卡顿掉帧，通过多线程处理捕获操作和帧操作，同时也可以避免阻塞定时器的回调任务。
-  
 
-```
-Error: imagemagick-cli failure
-Error: Failed to call 'convert /tmp/crossnote-svg2025019-4886-1so09bp.nge4.svg /home/lalafua/myWorkSpace/assets/1da74b7429c22e56e3ac5533c674bb000.png', which was mapped to '"convert" /tmp/crossnote-svg2025019-4886-1so09bp.nge4.svg /home/lalafua/myWorkSpace/assets/1da74b7429c22e56e3ac5533c674bb000.png'. Error is 'Command failed: "convert" /tmp/crossnote-svg2025019-4886-1so09bp.nge4.svg /home/lalafua/myWorkSpace/assets/1da74b7429c22e56e3ac5533c674bb000.png
-/bin/sh: 1: convert: not found
-'.
+@import "./assets/rosgraph.dot"
 
-Please make sure you have ImageMagick installed.
-```  
-
-  
 #### 目录结构
 ```
 sim_llm/
@@ -50,46 +41,46 @@ sim_llm/
 │       └── srv/
 └── assets/                         README.md 中用到的一些素材
 ```
-  
+
 ### 部署
-  
+
 #### 先决条件
 0. 我的工作环境（不确保能否在其他环境下正常运行）
-  
+
 ```
 Ubuntu VERSION == 24.04.1 LTS (Noble Numbat)
 ROS DISTRO == jazzy
 python3 version == 3.12.3
 cmake version == 3.28.3
 ```
-  
+
 1. clone该项目
-  
+
 ```bash
 git clone https://github.com/lalafua/sim_llm.git
 cd sim_llm/
 ```
-  
+
 2. 安装python包
     - 我使用 `pip freeze` 导出的 `requirements.txt` ，因此有些包是多余的，但是导出的包太多了就没有一个一个查
-  
+
 ```bash
 python3 -m venv .venv/
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-  
+
 3. 编译工程文件
-  
+
 ```bash
 colcon build
 ```
-  
+
 #### 运行
-  
+
 打开四个终端
 分别运行
-  
+
 ```bash
 source install/setup.bash
 ros2 run llm_robot llm_nlp
@@ -106,6 +97,5 @@ ros2 run llm_robot camera
 source install/setup.bash
 ros2 run turtle turtlesim
 ```
-  
+
 其中， `llm_nlp` 节点会在服务就绪后提示输入 `command` ，输入 `find the bottle` 后，就可以看到 turtle 正在寻找 bottle 了（其他指令还没有写，目前只有这一个，不过可以自己训练想要识别的目标）
-  
