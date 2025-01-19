@@ -18,14 +18,7 @@
 - `camera node` ：识别节点。从摄像头捕获图像，使用 Roboflow 模型进行物体检测，然后将检测结果发布到 `/camera/recognized`。为了缓解识别图像造成的卡顿掉帧，通过多线程处理捕获操作和帧操作，同时也可以避免阻塞定时器的回调任务。
   
 
-```
-Error: imagemagick-cli failure
-Error: Failed to call 'convert /tmp/crossnote-svg2025019-4886-1so09bp.nge4.svg /home/lalafua/myWorkSpace/assets/1da74b7429c22e56e3ac5533c674bb000.png', which was mapped to '"convert" /tmp/crossnote-svg2025019-4886-1so09bp.nge4.svg /home/lalafua/myWorkSpace/assets/1da74b7429c22e56e3ac5533c674bb000.png'. Error is 'Command failed: "convert" /tmp/crossnote-svg2025019-4886-1so09bp.nge4.svg /home/lalafua/myWorkSpace/assets/1da74b7429c22e56e3ac5533c674bb000.png
-/bin/sh: 1: convert: not found
-'.
-
-Please make sure you have ImageMagick installed.
-```  
+![](../assets/c77f360dcb28ae80bb89185d5d6c89570.png?0.75945752095614)
 
   
 #### 目录结构
