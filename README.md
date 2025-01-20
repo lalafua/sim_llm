@@ -107,6 +107,10 @@ ros2 run turtlesim turtlesim_node
 ```
   
 其中， `llm_nlp` 节点会在服务就绪后提示输入 `command` ，输入 `find the bottle` 后，就可以看到 turtle 正在寻找 bottle 了（其他指令还没有写，目前只有这一个，不过可以自己训练想要识别的目标）
+
+识别完成之后，识别到物体的帧会以 `{class_name}_{timestamp}.jpg` 的命名方式保存在 `run/` 目录下。
+
+![](run/bottle_20250120-153002.jpg)
   
   
   
