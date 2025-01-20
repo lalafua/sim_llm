@@ -6,6 +6,7 @@ from roboflow import Roboflow
 import cv2
 import os
 import threading
+import datetime
 
 class cameraNode(Node):
     def __init__(self, name):
@@ -15,7 +16,6 @@ class cameraNode(Node):
         self.timer_ = self.create_timer(0.5, self.timer_callback)
         self.detection = {"class_name": "", "confidence": 0.0}
 
-        # 打开摄像头
         self.cap = cv2.VideoCapture(0)
         self.frame = None
         self.predictions = []
@@ -25,7 +25,7 @@ class cameraNode(Node):
         project = rf.workspace("buildmyownx").project("bottle-fviyh")
         self.model = project.version(2).model
 
-        # 启动线程
+        # start capture and process threads 
         self.capture_thread = threading.Thread(target=self.capture_frames)
         self.capture_thread.start()
         self.process_thread = threading.Thread(target=self.process_frames)
@@ -41,7 +41,7 @@ class cameraNode(Node):
     def process_frames(self):
         while True:
             if self.frame is not None:
-                self.predictions = self.model.predict(self.frame, confidence=50, overlap=50).json()['predictions']
+                self.predictions = self.model.predict(self.frame, confidence=70, overlap=50).json()['predictions']
                 self.update_detection(self.predictions)
 
     def timer_callback(self):
@@ -53,9 +53,46 @@ class cameraNode(Node):
             self.get_logger().info("Published to topic '/camera/recognized': '{}'".format(msg.data))
 
     def update_detection(self, predictions):
+        # If there are predictions, update the detection    
         if predictions:
-            self.detection["class_name"] = predictions[0]['class']
-            self.detection["confidence"] = predictions[0]['confidence']
+            if predictions[0]['confidence'] and predictions[0]['class']:
+                self.detection["class_name"] = predictions[0]['class']
+                self.detection["confidence"] = predictions[0]['confidence']
+                self.save_frame(predictions)
+
+    def save_frame(self, predictions):
+        if self.frame is not None:
+            # Create a copy of the frame to draw on
+            frame_with_detections = self.frame.copy()
+
+            # Draw bounding boxes and labels on the frame
+            for prediction in predictions:
+                x = prediction['x']
+                y = prediction['y']
+                width = prediction['width']
+                height = prediction['height']
+                confidence = prediction['confidence']
+                class_name = prediction['class']
+
+                # Calculate the coordinates of the bounding box
+                start_point = (int(x - width / 2), int(y - height / 2))
+                end_point = (int(x + width / 2), int(y + height / 2))
+
+                # Draw the bounding box
+                cv2.rectangle(frame_with_detections, start_point, end_point, (0, 255, 0), 2)
+
+                # Draw the label above the bounding box
+                label = f'{class_name}: {confidence:.2f}'
+                cv2.putText(frame_with_detections, label, (start_point[0], start_point[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+            if not os.path.exists('run'):
+                os.makedirs('run')
+            
+            timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            filename = "run/{}_{}.jpg".format(class_name, timestamp)
+           
+            cv2.imwrite(filename, frame_with_detections)
+            self.get_logger().info("Frame saved to {}".format(filename))
 
 def main(args=None):
     rclpy.init(args=args)
