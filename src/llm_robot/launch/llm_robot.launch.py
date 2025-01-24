@@ -14,6 +14,17 @@ def generate_launch_description():
 
     pkg_share = FindPackageShare(package=package_name).find(package_name)
     
+    camera_node = Node(
+        package="llm_robot",
+        executable="camera",
+        name="camera",
+    )
+
+    llm_turtle_node = Node(
+        package="llm_robot",
+        executable="llm_turtle",
+        name="llm_turtle",
+    )
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
@@ -28,6 +39,13 @@ def generate_launch_description():
         name="rviz2",
         arguments=["-d", os.path.join(pkg_share, "rviz/{}".format(rviz_config_name))],
     )
+
+    ld.add_action(camera_node)
+    ld.add_action(llm_turtle_node)
+    ld.add_action(robot_state_publisher_node)
+    ld.add_action(rviz_node)
+     
+    return ld
 
 
 
