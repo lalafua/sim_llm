@@ -2,27 +2,36 @@ import rclpy, json, math, time,threading
 from rclpy.node import Node
 from my_interfaces.srv import Command
 from geometry_msgs.msg import Twist
-from turtlesim.msg import Pose
+from sensor_msgs.msg import JointState
+#from turtlesim.msg import Pose
 from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 
 
-class TurtleNode(Node):
+class llmRobotNode(Node):
     def __init__(self, name):       
         super().__init__(name)
         self.get_logger().info("Node {} has been created.".format(name))
 
         self.callback_group_ = MutuallyExclusiveCallbackGroup()
 
-        # Create subscriber to get turtle pose
-        self.turtle_pose_subscription_ = self.create_subscription(
-            Pose,
-            '/turtle1/pose',
-            self.pose_callback,
+        self.joint_state_publisher_ = self.create_publisher(
+            JointState,
+            "/joint_states",
             10,
-            callback_group=self.callback_group_)    
-        self.get_logger().info("Node has subscribed to '/turtle1/pose' ")
+        )
+
+        self.init_joint_state()
+
+        # # Create subscriber to get turtle pose
+        # self.turtle_pose_subscription_ = self.create_subscription(
+        #     Pose,
+        #     '/turtle1/pose',
+        #     self.pose_callback,
+        #     10,
+        #     callback_group=self.callback_group_)    
+        # self.get_logger().info("Node has subscribed to '/turtle1/pose' ")
 
         # Create subscriber to get camera message   
         self.camera_subscriber_ = self.create_subscription(
@@ -35,15 +44,15 @@ class TurtleNode(Node):
 
         self.lock = threading.Lock()
 
-        # Create publisher to control turtle
-        self.turtle_control_publisher_ = self.create_publisher(
-            Twist,
-            '/turtle1/cmd_vel',
-            10)
-        self.get_logger().info("Publisher 'cmd_vel' has been created.")
-        self.vel_msg = Twist()
-        self.current_pose = Pose()
-        self.recognized_goal = ""
+        # # Create publisher to control turtle
+        # self.turtle_control_publisher_ = self.create_publisher(
+        #     Twist,
+        #     '/turtle1/cmd_vel',
+        #     10)
+        # self.get_logger().info("Publisher 'cmd_vel' has been created.")
+        # self.vel_msg = Twist()
+        # self.current_pose = Pose()
+        # self.recognized_goal = ""
 
         self.parser_success = False
         self.parser_thread = None
@@ -52,23 +61,48 @@ class TurtleNode(Node):
         # Create server to receive command
         self.command_server_ = self.create_service(
             Command,
-            'llm_nlp/cmd',
+            '/llm_nlp/cmd',
             self.handle_request)
-        self.get_logger().info("Service 'nlp/nlp_cmd' has been created.")
+        self.get_logger().info("Service '/llm_nlp/cmd' has been created.")
 
-    def pose_callback(self, msg):
+    def init_joint_state(self):
         """
-        get turtle pose
+        initialize the joint state
+        """
+
+        self.joint_speed = [0.0, 0.0]
+        self.joint_state = JointState()
+        self.joint_state.header.stamp = self.get_clock().now().to_msg() 
+        self.joint_state.header.frame_id = "car_frame"
+        self.joint_state.name = ["left_wheel_joint", "right_wheel_joint"]
+        self.joint_state.position = [0.0, 0.0]
+        self.joint_state.velocity = self.joint_speed
+        self.joint_state.effort = []
+
+    def update_joint_speed(self, speed):
+        """
+        update the joint speed
 
         Args:
-            msg (Pose): the message from 'turtlebot' node
-        
-        Returns:
-            None
+            speed (list): the speed of left and right wheels
         """
 
-        with self.lock:
-            self.current_pose = msg  
+        self.joint_speed = speed
+        
+
+    # def pose_callback(self, msg):
+    #     """
+    #     get turtle pose
+
+    #     Args:
+    #         msg (Pose): the message from 'turtlebot' node
+        
+    #     Returns:
+    #         None
+    #     """
+
+    #     with self.lock:
+    #         self.current_pose = msg  
           
     def camera_callback(self, msg):
         """
@@ -257,7 +291,7 @@ class TurtleNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = TurtleNode("llm_turtle")
+    node = llmRobotNode("llm_robot")
     executor = MultiThreadedExecutor()
     executor.add_node(node)
 
