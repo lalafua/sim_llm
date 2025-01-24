@@ -13,8 +13,6 @@ setup(
     ],
     install_requires=[
         'setuptools',
-        'google.generativeai',
-        'absl.logging',
         ],
     zip_safe=True,
     maintainer='lalafua',

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot name="car">
+    
+  <!-- base link -->
+  <link name="base_link">
+      <visual>
+      <origin xyz="0 0 0.0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.12" radius="0.10"/>
+      </geometry>
+    </visual>
+  </link>
+    
+  <!-- camera link -->
+  <link name="camera_link">
+      <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.02" radius="0.02"/>
+      </geometry>
+      <material name="black">
+          <color rgba="0.0 0.0 0.0 0.8" /> 
+      </material>
+    </visual>
+  </link>
+    
+  <!-- laser joint -->
+    <joint name="camera_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="camera_link" />
+        <origin xyz="0 0 0.075" />
+    </joint>
+
+</robot>
