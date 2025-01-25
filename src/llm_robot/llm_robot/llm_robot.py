@@ -21,8 +21,9 @@ class llmRobotNode(Node):
             "/joint_states",
             10,
         )
-
         self.init_joint_state()
+        self.pub_rate = self.create_rate(30)
+        threading.Thread(target=self.thread_joint_state).start()
 
         # # Create subscriber to get turtle pose
         # self.turtle_pose_subscription_ = self.create_subscription(
@@ -88,7 +89,30 @@ class llmRobotNode(Node):
         """
 
         self.joint_speed = speed
-        
+
+    def thread_joint_state(self):
+        """
+        thread for controlling the joint state
+        """
+
+        last_time  = time.time()
+        while rclpy.ok():
+            delta_time =  time.time()-last_time
+            last_time = time.time()
+            
+            # Update joint state position
+            self.joint_state.position[0]  += delta_time*self.joint_state.velocity[0]
+            self.joint_state.position[1]  += delta_time*self.joint_state.velocity[1]
+            
+            # Update joint state velocity   
+            self.joint_state.velocity = self.joint_speed
+            
+            # Update header
+            self.joint_state.header.stamp = self.get_clock().now().to_msg()
+            
+            # Publish joint state
+            self.joint_state_publisher_.publish(self.joint_state)
+            self.pub_rate.sleep()
 
     # def pose_callback(self, msg):
     #     """
@@ -293,7 +317,6 @@ def main(args=None):
 
     node = llmRobotNode("llm_robot")
     node.update_joint_speed([15.0, -15.0])
-    node.joint_state_publisher_.publish(node.joint_state)
     executor = MultiThreadedExecutor()
     executor.add_node(node)
 
