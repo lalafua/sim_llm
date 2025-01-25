@@ -37,7 +37,7 @@ def generate_launch_description():
         package="rviz2",
         executable="rviz2",
         name="rviz2",
-        #arguments=["-d", os.path.join(pkg_share, "rviz/{}".format(rviz_config_name))],
+        arguments=["-d", os.path.join(pkg_share, "rviz/{}".format(rviz_config_name))],
     )
 
     #ld.add_action(camera_node)
