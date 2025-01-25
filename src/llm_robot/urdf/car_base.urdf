@@ -8,8 +8,8 @@
         <geometry>
             <cylinder length="0.12" radius="0.10"/>
         </geometry>
-        <material name="green">
-            <color rgba="0.0 1.0 0.0 0.5"/>
+        <material name="blue">
+            <color rgba="0.1 0.1 1.0 0.5"/>
         </material>
         </visual>
     </link>
@@ -81,27 +81,19 @@
         <visual>
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
             <geometry>
-                <material name="black">
-                    <color rgba="0.0 0.0 0.0 0.5"/>
-                </material>
+                <box size="0.02 0.02 0.02"/>
             </geometry>
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 0.5"/>
+            </material>
         </visual>
     </link>
 
     <!-- caster joint -->
-    <joint name="caster_joint">
+    <joint name="caster_joint" type="fixed">
         <origin xyz="0.06 0.0 -0.076" rpy="0.0 0.0 0.0"/>
         <parent link="base_link"/>
         <child link="caster_link"/>
     </joint>
-
-    <!-- Robot footprint -->
-    <link name="base_footprint">
-        <joint name="base_joint" type="fixed">
-            <origin xyz="0.0 0.0 0.076" rpy="0 0 0"/>
-            <parent link="base_footprint"/>
-            <child link="base_link"/>   
-        </joint>
-    </link>
 
 </robot>

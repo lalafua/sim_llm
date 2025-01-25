@@ -8,8 +8,6 @@
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>
-  <depend>google.generativeai</depend>
-  <depend>absl.logging</depend>
 
 
   <test_depend>ament_copyright</test_depend>

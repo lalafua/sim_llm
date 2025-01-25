@@ -20,10 +20,10 @@ def generate_launch_description():
         name="camera",
     )
 
-    llm_turtle_node = Node(
+    llm_robot_node = Node(
         package="llm_robot",
-        executable="llm_turtle",
-        name="llm_turtle",
+        executable="llm_robot",
+        name="llm_robot",
     )
 
     robot_state_publisher_node = Node(
@@ -37,11 +37,11 @@ def generate_launch_description():
         package="rviz2",
         executable="rviz2",
         name="rviz2",
-        arguments=["-d", os.path.join(pkg_share, "rviz/{}".format(rviz_config_name))],
+        #arguments=["-d", os.path.join(pkg_share, "rviz/{}".format(rviz_config_name))],
     )
 
-    ld.add_action(camera_node)
-    ld.add_action(llm_turtle_node)
+    #ld.add_action(camera_node)
+    ld.add_action(llm_robot_node)
     ld.add_action(robot_state_publisher_node)
     ld.add_action(rviz_node)
      

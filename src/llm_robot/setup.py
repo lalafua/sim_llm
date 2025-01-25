@@ -28,9 +28,8 @@ setup(
     entry_points={
         'console_scripts': [
             'llm_nlp = llm_robot.llm_nlp:main',
-            'llm_turtle = llm_robot.llm_turtle:main',
+            'llm_robot = llm_robot.llm_robot:main',
             'camera = llm_robot.camera:main',
-            'control_turtle = llm_robot.control_turtle:main',
         ],
     },
 )

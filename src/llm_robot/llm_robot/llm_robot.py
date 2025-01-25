@@ -292,6 +292,8 @@ def main(args=None):
     rclpy.init(args=args)
 
     node = llmRobotNode("llm_robot")
+    node.update_joint_speed([15.0, -15.0])
+    node.joint_state_publisher_.publish(node.joint_state)
     executor = MultiThreadedExecutor()
     executor.add_node(node)
 
