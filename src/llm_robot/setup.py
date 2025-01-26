@@ -1,4 +1,6 @@
 from setuptools import find_packages, setup
+from glob import glob
+import os
 
 package_name = 'llm_robot'
 
@@ -10,11 +12,12 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'urdf'), glob('urdf/**')),
+        (os.path.join('share', package_name, 'rviz'), glob('rviz/*.rviz')),     
     ],
     install_requires=[
         'setuptools',
-        'google.generativeai',
-        'absl.logging',
         ],
     zip_safe=True,
     maintainer='lalafua',
@@ -25,9 +28,8 @@ setup(
     entry_points={
         'console_scripts': [
             'llm_nlp = llm_robot.llm_nlp:main',
-            'llm_turtle = llm_robot.llm_turtle:main',
+            'llm_robot = llm_robot.llm_robot:main',
             'camera = llm_robot.camera:main',
-            'control_turtle = llm_robot.control_turtle:main',
         ],
     },
 )

@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<robot name="car">
+        
+    <!-- base link -->
+    <link name="base_link">
+        <visual>
+        <origin xyz="0 0 0.0" rpy="0 0 0"/>
+        <geometry>
+            <cylinder length="0.12" radius="0.10"/>
+        </geometry>
+        <material name="blue">
+            <color rgba="0.1 0.1 1.0 0.5"/>
+        </material>
+        </visual>
+    </link>
+
+    <!-- camera link -->
+    <link name="camera_link">
+        <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <box size="0.02 0.02 0.02"/>
+        </geometry>
+        <material name="black">
+            <color rgba="0.0 0.0 0.0 0.8" /> 
+        </material>
+        </visual>
+    </link>
+    
+    <!-- camera joint -->
+    <joint name="camera_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="camera_link" />
+        <origin xyz="0 0 0.075" />
+    </joint>
+
+    <!-- right wheel link -->
+    <link name="right_wheel_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="1.57079 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.04" length="0.032"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 0.5"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- right_wheel_joint -->
+    <joint name="right_wheel_joint" type="continuous">
+        <origin xyz="-0.02 -0.10 -0.06" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="right_wheel_link"/>
+        <axis xyz="0.0 1.0 0.0"/>
+    </joint>
+
+    <!-- left wheel link -->
+    <link name="left_wheel_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="1.57079 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="0.04" length="0.032"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 0.5"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- left wheel joint -->
+    <joint name="left_wheel_joint" type="continuous">
+        <origin xyz="-0.02 0.10 -0.06" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="left_wheel_link"/>
+        <axis xyz="0.0 1.0 0.0"/>
+    </joint>
+
+    <!-- caster link -->
+    <link name="caster_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.02 0.02 0.02"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 0.5"/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- caster joint -->
+    <joint name="caster_joint" type="fixed">
+        <origin xyz="0.06 0.0 -0.076" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="caster_link"/>
+    </joint>
+
+</robot>
