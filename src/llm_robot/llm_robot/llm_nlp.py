@@ -7,36 +7,42 @@ from rclpy.executors import MultiThreadedExecutor
 
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 PROMPT = """
-    prompt: Hello Deepseek! You will receive a text command from a robot. You need to convert it to a json string in plain text."
+    prompt: Hello DeepseekV3! You will receive a text command from a robot. You need to convert it to a json string in plain text.
     prompt: find the plastic bottle.
         answer:{
             "commands":[
                 {
                     "command": "find",
                     "parms":{
-                        "goal":"red boll"
+                        "object":"plastic bottle"
                     }
                 }
             ]
         }
-    prompt: find the red boll.
+    prompt: pick up the red boll.
         answer:{
             "commands":[
                 {
-                    "command": "find",
+                    "command": "pick_up",
                     "parms":{
-                        "goal":"red boll"
+                        "object":"red boll"
                     }
                 }
             ]
         }
-    prompt: find the phone.
+    prompt: pick up my phone and close the door.
         answer:{
             "commands":[
                 {
-                    "command": "find",
+                    "command": "pick_up",
                     "parms":{
-                        "goal":"phone"
+                        "object": "phone"
+                    }
+                },
+                {
+                    "command": "close",
+                    "parms":{
+                        "object": "door"
                     }
                 }
             ]
