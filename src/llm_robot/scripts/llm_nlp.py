@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy, os, threading
-from llm_robot.srv import trans 
+from llm_robot.srv import trans, transRequest 
 from openai import OpenAI
 
 SILICONFLOW_API_KEY = os.getenv("SILICONFLOW_API_KEY")
@@ -53,7 +53,7 @@ class NLPNode:
         rospy.init_node(name, anonymous=True)
         rospy.loginfo("Node {} has been created.".format(name))
 
-        self.service_name = "/llm_nlp/cmd"
+        self.service_name = "/trans"
 
         self.siliconflow_client = OpenAI(api_key=SILICONFLOW_API_KEY, base_url="https://api.siliconflow.cn/v1")
 
@@ -95,7 +95,10 @@ class NLPNode:
         rospy.loginfo("Waiting for service: {}".format(self.service_name))
         rospy.wait_for_service(self.service_name)
         try:
-            command_client = rospy.ServiceProxy(self.service_name, trans)
+            command_client = rospy.ServiceProxy(
+                name=self.service_name,
+                service_class=trans
+                )
         except rospy.ServiceException as e:
             rospy.logerr("Failed to create service proxy: {}".format(e))
             return 
@@ -105,7 +108,7 @@ class NLPNode:
             result = self.genai(user_input)
 
             # Crafting service request
-            request = trans.CommandRequest()
+            request = transRequest()
             request.command = result
 
             try:
@@ -119,7 +122,10 @@ class NLPNode:
 
 def main():
     nlp_node = NLPNode("nlp_node")
-    rospy.spin()
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        rospy.loginfo("Shutting down...")   
 
 if __name__ == "__main__":
     main()
