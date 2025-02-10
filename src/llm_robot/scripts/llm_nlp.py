@@ -92,6 +92,7 @@ class NLPNode:
         """
         
         # Wait for the service to be available
+        rospy.loginfo("Waiting for service: {}".format(self.service_name))
         rospy.wait_for_service(self.service_name)
         try:
             command_client = rospy.ServiceProxy(self.service_name, trans)
