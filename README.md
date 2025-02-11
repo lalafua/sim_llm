@@ -15,30 +15,6 @@
 - `camera node` ：识别节点。从摄像头捕获图像，使用 Roboflow 模型进行物体检测，然后将检测结果发布到 `/camera/recognized`。为了缓解识别图像造成的卡顿掉帧，通过多线程处理捕获操作和帧操作，同时也可以避免阻塞定时器的回调任务。
   
 
-![](assets/rosgraph.png)  
-  
-#### 目录结构
-```
-sim_llm/
-├── src/
-│   ├── llm_robot/
-│   │   ├── llm_robot/               核心代码
-│   │   ├── resource/
-│   │   └── roboflow/                本地基于yolov8n训练的模型，但是很奇怪效果没有调用 roboflow 的 api 好，可能是由于电脑太老了跑不动。
-│   │       ├── runs/detect/train/
-│   │       ├── test/                
-│   │       │   └── images
-│   │       │   └── labels
-│   │       ├── train/
-│   │       │   └── images
-│   │       │   └── labels
-│   │       └── valid/
-│   │           └── images
-│   │           └── labels
-│   └── my_interfaces/              自定义的接口
-│       └── srv/
-└── assets/                         README.md 中用到的一些素材
-```
   
 ### 部署
   
