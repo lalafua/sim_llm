@@ -68,7 +68,7 @@ class NLPNode:
         """
 
         response = self.siliconflow_client.chat.completions.create(
-                model="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+                model="Qwen/Qwen2.5-32B-Instruct",
                 messages=[
                     {
                         "role": "system", 
@@ -112,7 +112,8 @@ class NLPNode:
             request.command = result
 
             try:
-                response = command_client(request)
+                rospy.loginfo("Service call: \n{}".format(request.command))
+                response = command_client(request) 
                 if response.is_success:
                     rospy.loginfo("Service call succeeded: {}".format(response))
                 else:

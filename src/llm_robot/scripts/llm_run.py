@@ -90,7 +90,7 @@ class llmRobotNode:
         target_pose = Pose()
         target_pose.x = target_x
         target_pose.y = target_y
-        rospy.loginfo("Turtle is moving to target: {}".format(target_pose))
+        rospy.loginfo("Turtle is moving to target: \n{}".format(target_pose))
 
         while not rospy.is_shutdown():
             with self.lock:
@@ -99,14 +99,13 @@ class llmRobotNode:
             if distance < 0.1:
                 break
             angle = math.atan2(target_pose.y - cur_pose.y, target_pose.x - cur_pose.x)
-            angular_diff = angle - self.cur_pose.theta
+            angular_diff = angle - cur_pose.theta
             angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
 
             if object and object == self.recognized_object:
                 self.parser_success = True
                 self.parser_event.set()
-                rospy.loginfo("Object found at position: {}".format(
-                    cur_pose)) 
+                rospy.loginfo("Object found at position: \n{}".format(cur_pose)) 
                 return
             
             if abs(angular_diff) > 0.1:
@@ -120,7 +119,7 @@ class llmRobotNode:
             time.sleep(0.1)
         
         self.stop()
-        rospy.loginfo("Turtle has reached {}".format(cur_pose))
+        rospy.loginfo("Turtle has reached \n{}".format(cur_pose))
 
     def stop(self):
         """
@@ -184,9 +183,12 @@ class llmRobotNode:
             command = item["command"]
             parms = item["parms"]
             if command in command_map:
-                command_map[command](parms)
+                result = command_map[command](parms)
+                if isinstance(result, threading.Thread):
+                    result.join()
             else:
                 rospy.logwarn("Command not found: {}".format(command))
+                break
     
     def find(self, object):
         """
@@ -199,6 +201,7 @@ class llmRobotNode:
             None
         """
 
+        rospy.loginfo("Start finding :{}".format(object))
         self.parser_success = False 
         self.parser_event.clear()
         
@@ -228,6 +231,8 @@ class llmRobotNode:
         
         patrol_thread = threading.Thread(target=patrol)
         patrol_thread.start()
+
+        return patrol_thread
 
 def main():
     node = llmRobotNode(name="llm_robot")
