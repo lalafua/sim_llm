@@ -2,7 +2,11 @@
   
 ### 介绍
   
-该分支基于 ROS1 实现   
+该分支基于 ROS1 实现
+
+#### DEMO
+
+![](assets/demo.gif)
   
 #### 任务逻辑
 主体任务逻辑分三个 `node` 完成：
@@ -13,8 +17,6 @@
 - `llm_run node` ：控制节点。订阅 `turtle1` 节点发布的 `turtle1/pose` 位置信息，订阅 `camera` 节点发布的 `/camera/recognized` 识别的目标信息，创建 publisher 发布到 `/turtle1/cmd_vel` 控制 turtle 移动。用于控制 turtle 执行巡逻任务，并通过相机识别目标。如果在巡逻过程中识别到目标，立即记录当前位置并打印信息。采用多线程处理巡逻任务和命令请求以及基本信息获取，确保各个功能之间不会互相影响，达到实时响应。
   
 - `camera node` ：识别节点。从摄像头捕获图像，使用 Roboflow 模型进行物体检测，然后将检测结果发布到 `/camera/recognized`。为了缓解识别图像造成的卡顿掉帧，通过多线程处理捕获操作和帧操作，同时也可以避免阻塞定时器的回调任务。
-  
-
   
 ### 部署
   
@@ -61,9 +63,12 @@ catkin_make
   
 #### 运行
   
-打开四个终端
+打开五个终端
 分别运行
-  
+
+```bash
+roscore
+```
 ```bash
 source devel/setup.bash
 rosrun llm_robot llm_nlp
