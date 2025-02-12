@@ -71,15 +71,15 @@ roscore
 ```
 ```bash
 source devel/setup.bash
-rosrun llm_robot llm_nlp
+rosrun llm_robot llm_nlp.py
 ```
 ```bash
 source devel/setup.bash
-rosrun llm_robot llm_run
+rosrun llm_robot llm_run.py
 ```
 ```bash
 source devel/setup.bash
-rosrun llm_robot camera
+rosrun llm_robot camera.py
 ```
 ```bash
 source devel/setup.bash
