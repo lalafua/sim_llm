@@ -57,9 +57,9 @@ SiliconFlow: https://siliconflow.cn/
 RoboFLow: https://roboflow.com/
 
 ```bash
-export PYTHONPATH=$PYTHONPATH:<prefix_path>/.venv/lib/<your python versin>/site-packages/
+export PYTHONPATH=$PYTHONPATH:<prefix_path>/.venv/lib/<your_python_versin>/site-packages/
 ```
-这里的 <prefix_path> 请替换为 .venv/ 所在的绝对路径，<your python version> 替换为你实际的 python 版本  
+<prefix_path> 请替换为 .venv/ 所在的绝对路径，<your_python_version> 替换为你实际的 python 版本  
 
 4. 编译工程文件
   
