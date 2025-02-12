@@ -48,12 +48,18 @@ pip install -r requirements.txt
 
 3. 设置环境变量
 
+打开 ~/.bashrc，在最后面添加：
 ```bash
-export SILICONFLOW_API_KEY = "<your SiliconFlow api key>"
-export ROBOFLOW_API_KEY = "<your RoboFlow api key>"
+export SILICONFLOW_API_KEY="<your SiliconFlow api key>"
+export ROBOFLOW_API_KEY="<your RoboFlow api key>"
 ``` 
 SiliconFlow: https://siliconflow.cn/
 RoboFLow: https://roboflow.com/
+
+```bash
+export PYTHONPATH=$PYTHONPATH:<prefix_path>/.venv/lib/<your python versin>/site-packages/
+```
+这里的 <prefix_path> 请替换为 .venv/ 所在的绝对路径，<your python version> 替换为你实际的 python 版本  
 
 4. 编译工程文件
   
