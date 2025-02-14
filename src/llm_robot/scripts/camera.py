@@ -7,7 +7,7 @@ import cv2
 import os
 import threading                
 import datetime
-from roboflow import Roboflow
+from ultralytics import YOLO
 
 class CameraNode:
     def __init__(self, name):
@@ -23,10 +23,8 @@ class CameraNode:
         self.frame = None
         self.predictions = []
 
-        # Init Roboflow project 
-        rf = Roboflow(api_key=os.getenv("ROBOFLOW_API_KEY"))
-        project = rf.workspace("buildmyownx").project("bottle-fviyh")
-        self.model = project.version(2).model
+        # Init YOLOv8n model
+        self.model = YOLO("./yolov8n.pt")
 
         self.capture_thread = threading.Thread(target=self.capture_frames)
         self.capture_thread.daemon = True
@@ -49,8 +47,26 @@ class CameraNode:
         while not rospy.is_shutdown():
             if self.frame is not None:
                 try:
-                    self.predictions = self.model.predict(self.frame, confidence=70, overlap=50).json()['predictions']
-                    self.update_detection(self.predictions)
+                    results = self.model.predict(self.frame, conf=0.7, iou=0.5, classes=[39], verbose=False)
+                    predictions = []
+                    if results and results[0].boxes:
+                        boxes = results[0].boxes
+                        for i in range(len(boxes)):
+                            xywh = boxes.xywh[i].cpu().detach().numpy()
+                            conf = float(boxes.conf[i])
+                            cls = int(boxes.cls[i])
+                            # 获取类别名称
+                            class_name = self.model.names[cls] if self.model.names else str(cls)
+                            predictions.append({
+                                'x': float(xywh[0]),
+                                'y': float(xywh[1]),
+                                'width': float(xywh[2]),
+                                'height': float(xywh[3]),
+                                'confidence': conf,
+                                'class': class_name
+                            })
+                    self.predictions = predictions
+                    self.update_detection(predictions)
                 except Exception as e:
                     rospy.logerr("Prediction error: %s", e)
             rospy.sleep(0.1)
