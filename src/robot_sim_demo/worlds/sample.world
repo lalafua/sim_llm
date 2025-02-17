@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+ <world name="default">
+    <scene>
+      <ambient>0.68 0.68 0.68 1.0</ambient>
+      <shadows> false</shadows>
+      <sky>
+        <sunrise/>
+        <clouds>
+          <speed>12</speed>
+      </clouds>
+      </sky>
+    </scene>
+
+    <physics type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+
+    <include>
+      <uri>model://SampleScene</uri>
+    </include>
+    <include>
+      <uri>model://ISCAS_groundplane</uri>
+    </include>
+  </world>
+</sdf>

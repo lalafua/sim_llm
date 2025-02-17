@@ -1,0 +1,42 @@
+<package>
+  <name>navigation_sim_demo</name>
+  <version>0.0.1</version>
+  <description>
+  A navigation demo of xbot-u, with gmapping, amcl.
+  </description>
+  <author>Chai Changkun</author>
+  <author>Han JinFei</author>
+  <maintainer email="chaichangkun@163.com">Chai Changkun</maintainer>
+  <maintainer email="hanjf_robin@163.com">Han Jinfei</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>move_base</build_depend>
+  <build_depend>map_server</build_depend>
+  <build_depend>amcl</build_depend>
+  <build_depend>gmapping</build_depend>
+  <build_depend>dwa_local_planner</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>controller_manager</run_depend>
+  <run_depend>urdf</run_depend>
+  <run_depend>effort_controllers</run_depend>
+  <run_depend>gazebo_plugins</run_depend>
+  <run_depend>gazebo_ros</run_depend>
+  <run_depend>gazebo_ros_control</run_depend>
+  <run_depend>joint_state_controller</run_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>xacro</run_depend>
+  <run_depend>move_base</run_depend>
+  <run_depend>map_server</run_depend>  
+  <run_depend>amcl</run_depend>
+  <run_depend>gmapping</run_depend>
+  <run_depend>dwa_local_planner</run_depend>
+</package>
