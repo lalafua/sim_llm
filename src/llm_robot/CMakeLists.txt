@@ -12,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   roscpp
   rospy
+  geometry_msgs
+  actionlib
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -70,6 +73,7 @@ add_service_files(
 # Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
+  geometry_msgs 
   std_msgs  # Or other packages containing msgs
 )
 
@@ -105,7 +109,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES llm_robot
-   CATKIN_DEPENDS message_runtime std_msgs roscpp rospy
+   CATKIN_DEPENDS message_runtime std_msgs roscpp rospy geometry_msgs actionlib tf
 #  DEPENDS system_lib
 )
 
@@ -117,7 +121,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-# ${catkin_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
