@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import rospy, json, math, time, threading
+import rospy, json, time, threading
 from std_msgs.msg import String
-# from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist
 from llm_robot.srv import trans, transResponse
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
@@ -44,15 +43,6 @@ class llmRobotNode:
         rospy.init_node(name, anonymous=True)
         rospy.loginfo("Node {} has been created.".format(name))
 
-        # # Create subscriber to get turtle pose
-        # self.turtle_pose_sub = rospy.Subscriber(
-        #     name="/turtle1/pose",
-        #     data_class=Pose,
-        #     callback=self.pose_callback,
-        #     queue_size=10
-        # )
-        # rospy.loginfo("Node has subscriped to '/turtle1/pose'")
-
         # Create subscriber to get camera message
         self.camera_sub = rospy.Subscriber(
             name="/camera/recognized",
@@ -62,25 +52,6 @@ class llmRobotNode:
         )
         rospy.loginfo("Node has subscriped to '/camera/recognized'")
         self.recognized_object = "" # Initialize recognized object
-
-        # # Create publisher to control turtlesim
-        # self.turtle_control_pub = rospy.Publisher(
-        #     name="/turtle1/cmd_vel",
-        #     data_class=Twist,
-        #     queue_size=10
-        # )
-        # rospy.loginfo("Node has created publisher to '/turtle1/cmd_vel'")
-
-        # self.vel_msg = Twist() # Initialize velocity message
-        # self.current_pose = Pose() # Initialize current pose
-        
-        # Create MoveBaseAction client to control gazebo robot
-        self.action_client = ModSimpleActionClient(
-            ns = 'move_base',
-            ActionSpec = MoveBaseAction
-            )
-        # Wait for MoveBaseAction server startup
-        self.action_client.wait_for_server()
         
         self.lock = threading.Lock() # Create thread lock 
 
@@ -94,19 +65,13 @@ class llmRobotNode:
         self.parser_success = False
         self.parser_event = threading.Event()
 
-    # def pose_callback(self, msg):
-    #     """
-    #     get turtle pose
-
-    #     Args:
-    #         msg (Pose): the message from '/turtle1/pose'
-        
-    #     Returns:
-    #         None
-    #     """
-
-    #     with self.lock:
-    #         self.current_pose = msg
+                # Create MoveBaseAction client to control gazebo robot
+        self.action_client = ModSimpleActionClient(
+            ns = 'move_base',
+            ActionSpec = MoveBaseAction
+            )
+        # Wait for MoveBaseAction server startup
+        self.action_client.wait_for_server()
         
     def camera_callback(self, msg):
         """
@@ -119,60 +84,6 @@ class llmRobotNode:
         with self.lock:
             self.recognized_object = msg.data
             rospy.loginfo("Recognized object: {}".format(self.recognized_object))
-
-    # def move_to_target(self, target_x, target_y, object=""):
-    #     """
-    #     control the turtlebot to move to target, if object is find, stop
-
-    #     Args:
-    #         target_x (float): target x
-    #         target_y (float): target y
-    #         goal (str): the object to find
-    #     """
-
-    #     target_pose = Pose()
-    #     target_pose.x = target_x
-    #     target_pose.y = target_y
-    #     rospy.loginfo("Turtle is moving to target: \n{}".format(target_pose))
-
-    #     while not rospy.is_shutdown():
-    #         with self.lock:
-    #             cur_pose = self.current_pose
-    #         distance = math.hypot(target_pose.x - cur_pose.x, target_pose.y - cur_pose.y)
-    #         if distance < 0.1:
-    #             break
-    #         angle = math.atan2(target_pose.y - cur_pose.y, target_pose.x - cur_pose.x)
-    #         angular_diff = angle - cur_pose.theta
-    #         angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
-
-    #         if object and object == self.recognized_object:
-    #             self.parser_success = True
-    #             self.parser_event.set()
-    #             rospy.loginfo("Object found at position: \n{}".format(cur_pose)) 
-    #             return
-            
-    #         if abs(angular_diff) > 0.1:
-    #             self.vel_msg.linear.x = 0.0
-    #             self.vel_msg.angular.z = angular_diff
-    #             self.turtle_control_pub.publish(self.vel_msg)
-    #         else:
-    #             self.vel_msg.linear.x = min(1.5, distance)
-    #             self.vel_msg.angular.z = 0.0    
-    #             self.turtle_control_pub.publish(self.vel_msg)
-    #         time.sleep(0.1)
-        
-    #     self.stop()
-    #     rospy.loginfo("Turtle has reached \n{}".format(cur_pose))
-
-    # def stop(self):
-    #     """
-    #     stop the turtlebot
-    #     """
-
-    #     self.vel_msg.linear.x = 0.0
-    #     self.vel_msg.angular.z = 0.0
-    #     self.turtle_control_pub.publish(self.vel_msg)
-    #     rospy.loginfo("Turtle has stopped.")
 
     def handle_request(self, request):
         """
@@ -271,22 +182,8 @@ class llmRobotNode:
             [(5.0,1.0,0.0),(0.0,0.0,180.0)]
         ]
 
-        # with self.lock:
-        #     cur_pose = self.current_pose
-
-        # original_position = (cur_pose.x, cur_pose.y)
-        # rospy.loginfo("Original position: {}".format(original_position))
-
         def patrol():
             while not self.parser_success and not rospy.is_shutdown():
-            #     for point in patrol_points:
-            #         if self.parser_success:
-            #             break
-            #         self.move_to_target(point[0], point[1], object)
-            #     if not self.parser_success:
-            #         rospy.loginfo("Goal not found, continuing patrol.")
-            # self.move_to_target(original_position[0], original_position[1])
-            # rospy.loginfo("Returned to original position.")
 
                 for pose in patrol_points:
                     goal = self.goal_pose(pose)
@@ -296,7 +193,6 @@ class llmRobotNode:
                         break
                 if not self.parser_success:
                     rospy.loginfo("Object not found, continuing patrol.")
-
         
         def detect_object(object):
             while not self.parser_success and not rospy.is_shutdown():
