@@ -291,7 +291,7 @@ class llmRobotNode:
                 for pose in patrol_points:
                     goal = self.goal_pose(pose)
                     self.action_client.send_goal(goal)
-                    self.action_client.wait_for_result(interrupt_event=self.parser_event, timeout=rospy.Duration(30))  
+                    self.action_client.wait_for_result(interrupt_event=self.parser_event, timeout=rospy.Duration(60))  
                     if self.parser_success:
                         break
                 if not self.parser_success:
