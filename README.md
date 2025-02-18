@@ -37,8 +37,7 @@ git clone -b ROS1 https://github.com/lalafua/sim_llm.git
 cd sim_llm/
 ```
   
-2. 安装python包
-    - 我使用 `pip freeze` 导出的 `requirements.txt` ，因此有些包是多余的，但是导出的包太多了就没有一个一个查
+2. 安装 python 包
   
 ```bash
 python3 -m venv .venv/
@@ -46,12 +45,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. 设置环境变量
+3. 安装 ROS 依赖
+
+```bash
+rosdep install --from-paths src --ignore-src --rosdistro=$ROS_DISTRO -y
+```
+
+4. 设置环境变量
 
 打开 ~/.bashrc，在最后面添加：
 ```bash
 export SILICONFLOW_API_KEY="<your SiliconFlow api key>"
-export ROBOFLOW_API_KEY="<your RoboFlow api key>"
 ``` 
 SiliconFlow: https://siliconflow.cn/
 RoboFLow: https://roboflow.com/
@@ -64,12 +68,12 @@ export PYTHONPATH=$PYTHONPATH:<prefix_path>/.venv/lib/<your_python_versin>/site-
 4. 编译工程文件
   
 ```bash
-catkin_make
+catkin build
 ```
   
 #### 运行
   
-打开五个终端
+打开三个终端
 分别运行
 
 ```bash
@@ -81,15 +85,7 @@ rosrun llm_robot llm_nlp.py
 ```
 ```bash
 source devel/setup.bash
-rosrun llm_robot llm_run.py
-```
-```bash
-source devel/setup.bash
-rosrun llm_robot camera.py
-```
-```bash
-source devel/setup.bash
-rosrun turtlesim turtlesim_node
+roslaunch llm_robot llm_robot.launch
 ```
   
 其中， `llm_nlp` 节点会在服务就绪后提示输入 `command` ，输入 `find the bottle` 后，就可以看到 turtle 正在寻找 bottle 了（其他指令还没有写，目前只有这一个，不过可以自己训练想要识别的目标）
