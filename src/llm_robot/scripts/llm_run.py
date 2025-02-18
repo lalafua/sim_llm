@@ -154,9 +154,7 @@ class llmRobotNode:
             command = item["command"]
             parms = item["parms"]
             if command in command_map:
-                result = command_map[command](parms)
-                if isinstance(result, threading.Thread):
-                    result.join()
+                command_map[command](parms)
             else:
                 rospy.logwarn("Command not found: {}".format(command))
                 break
@@ -193,7 +191,6 @@ class llmRobotNode:
                     self.action_client.send_goal(goal)
                     finished = self.action_client.wait_for_result(
                         interrupt_event=self.parser_event, 
-                        timeout=rospy.Duration(60)
                     )
 
                     # 
@@ -210,11 +207,20 @@ class llmRobotNode:
                     rospy.loginfo("Object not found, continuing patrol.")
         
         def detect_object(object):
+            tf_listener = tf.TransformListener()
             while not self.parser_success and not rospy.is_shutdown():
                 if self.recognized_object == object:
                     self.parser_success = True
                     self.parser_event.set()
-                    rospy.loginfo("Object found: {}".format(object))
+                    try:
+                        # 等待获取 transform 数据
+                        tf_listener.waitForTransform("map", "base_link", rospy.Time(0), rospy.Duration(3.0))
+                        (trans, rot) = tf_listener.lookupTransform("map", "base_link", rospy.Time(0))
+                        rospy.loginfo("Object found: {} at current position: x: {:.2f}, y: {:.2f}, z: {:.2f}".format(
+                            object, trans[0], trans[1], trans[2]
+                        ))
+                    except Exception as e:
+                        rospy.logerr("TF error: {}".format(e))
                     self.action_client.cancel_goal()
                     break
                 time.sleep(0.1)
@@ -227,7 +233,23 @@ class llmRobotNode:
         patrol_thread.join()
         detect_thread.join()
 
-        return patrol_thread
+        # Add return to origin
+        if self.parser_success:
+            rospy.loginfo("Returning to origin position.")
+            origin_x = rospy.get_param("x", 5.0)
+            origin_y = rospy.get_param("y", 1.0)
+            origin_z = rospy.get_param("z", 0.0)
+            origin_yaw = rospy.get_param("yaw", -3.1)
+            origin_pose = self.goal_pose([[origin_x, origin_y, origin_z], [0.0, 0.0, origin_yaw]])
+            self.action_client.send_goal(origin_pose)
+            finished = self.action_client.wait_for_result()
+            if finished:
+                rospy.loginfo("Returned to origin successfully.")
+            else:
+                rospy.logwarn("Return to origin timed out.")
+        else:
+            rospy.loginfo("Target not found, skipping return-to-origin.")
+        
 
 def main():
     node = llmRobotNode(name="llm_robot")
