@@ -184,13 +184,28 @@ class llmRobotNode:
 
         def patrol():
             while not self.parser_success and not rospy.is_shutdown():
-
                 for pose in patrol_points:
-                    goal = self.goal_pose(pose)
-                    self.action_client.send_goal(goal)
-                    self.action_client.wait_for_result(interrupt_event=self.parser_event, timeout=rospy.Duration(60))  
-                    if self.parser_success:
+                    if self.parser_success or rospy.is_shutdown():  
                         break
+                    goal = self.goal_pose(pose)
+                    
+                    rospy.loginfo("Sending patrol goal: {}".format(pose))
+                    self.action_client.send_goal(goal)
+                    finished = self.action_client.wait_for_result(
+                        interrupt_event=self.parser_event, 
+                        timeout=rospy.Duration(60)
+                    )
+
+                    # 
+                    if self.parser_event.is_set():
+                        rospy.loginfo("Object found, stopping patrol.")
+                        self.action_client.cancel_goal() 
+                        break
+                    
+                    self.action_client.cancel_goal()
+                    if not finished:
+                        rospy.loginfo("Patrol goal timeout, continuing patrol")
+
                 if not self.parser_success:
                     rospy.loginfo("Object not found, continuing patrol.")
         
@@ -200,6 +215,7 @@ class llmRobotNode:
                     self.parser_success = True
                     self.parser_event.set()
                     rospy.loginfo("Object found: {}".format(object))
+                    self.action_client.cancel_goal()
                     break
                 time.sleep(0.1)
                     
@@ -207,6 +223,9 @@ class llmRobotNode:
         patrol_thread.start()
         detect_thread = threading.Thread(target=detect_object, args=(object,))
         detect_thread.start()
+
+        patrol_thread.join()
+        detect_thread.join()
 
         return patrol_thread
 
