@@ -23,53 +23,53 @@
 #### 先决条件
 0. 我的工作环境（不确保能否在其他环境下正常运行）
   
-```
-Ubuntu VERSION == 20.04.6 LTS
-ROS DISTRO == noetic
-python3 version == 3.8.10
-catkin version == 0.9.4
-```
+    ```
+    Ubuntu VERSION == 20.04.6 LTS
+    ROS DISTRO == noetic
+    python3 version == 3.8.10
+    catkin version == 0.9.4
+    ```
   
 1. clone 该项目的ROS1分支
   
-```bash
-git clone -b ROS1 https://github.com/lalafua/sim_llm.git
-cd sim_llm/
-```
+    ```bash
+    git clone -b ROS1 https://github.com/lalafua/sim_llm.git
+    cd sim_llm/
+    ```
   
 2. 安装 python 包
   
-```bash
-python3 -m venv .venv/
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+    ```bash
+    python3 -m venv .venv/
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    ```
 
 3. 安装 ROS 依赖
 
-```bash
-rosdep install --from-paths src --ignore-src --rosdistro=$ROS_DISTRO -y
-```
+    ```bash
+    rosdep install --from-paths src --ignore-src --rosdistro=$ROS_DISTRO -y
+    ```
 
 4. 设置环境变量
 
-打开 ~/.bashrc，在最后面添加：
-```bash
-export SILICONFLOW_API_KEY="<your SiliconFlow api key>"
-``` 
-SiliconFlow: https://siliconflow.cn/
-RoboFLow: https://roboflow.com/
+    打开 ~/.bashrc，在最后面添加：
+    ```bash
+    export SILICONFLOW_API_KEY="<your SiliconFlow api key>"
+    ``` 
+    SiliconFlow: https://siliconflow.cn/
+    RoboFLow: https://roboflow.com/
 
-```bash
-export PYTHONPATH=$PYTHONPATH:<prefix_path>/.venv/lib/<your_python_versin>/site-packages/
-```
-<prefix_path> 请替换为 .venv/ 所在的绝对路径，<your_python_version> 替换为你实际的 python 版本  
+    ```bash
+    export PYTHONPATH=$PYTHONPATH:<prefix_path>/.venv/lib/<your_python_versin>/site-packages/
+    ```
+    <prefix_path> 请替换为 .venv/ 所在的绝对路径，<your_python_version> 替换为你实际的 python 版本  
 
 5. 编译工程文件
   
-```bash
-catkin build
-```
+    ```bash
+    catkin build
+    ```
   
 #### 运行
   
