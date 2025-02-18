@@ -65,7 +65,7 @@ export PYTHONPATH=$PYTHONPATH:<prefix_path>/.venv/lib/<your_python_versin>/site-
 ```
 <prefix_path> 请替换为 .venv/ 所在的绝对路径，<your_python_version> 替换为你实际的 python 版本  
 
-4. 编译工程文件
+5. 编译工程文件
   
 ```bash
 catkin build
@@ -77,6 +77,7 @@ catkin build
 分别运行
 
 ```bash
+source devel/setup.bash
 roscore
 ```
 ```bash
