@@ -68,7 +68,7 @@ class NLPNode:
         """
 
         response = self.siliconflow_client.chat.completions.create(
-                model="Qwen/Qwen2.5-32B-Instruct",
+                model="deepseek-ai/DeepSeek-V3",
                 messages=[
                     {
                         "role": "system", 
