@@ -4,7 +4,7 @@
 import rospy
 from std_msgs.msg import String
 import cv2
-import os
+import os, rospkg
 import threading                
 import datetime
 from ultralytics import YOLO
@@ -106,12 +106,13 @@ class CameraNode:
                 cv2.putText(frame_with_detections, label, (start_point[0], start_point[1] - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            if not os.path.exists('run'):
-                os.makedirs('run')
+
+            rospack = rospkg.RosPack()
+            workspace_root = os.path.abspath(os.path.join(rospack.get_path('llm_robot'), '..'))
             
             timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             class_name = predictions[0]['class']
-            filename = "run/{}_{}.jpg".format(class_name, timestamp)
+            filename = os.path.join(workspace_root, "{}_{}.jpg".format(class_name, timestamp))
             cv2.imwrite(filename, frame_with_detections)
             rospy.loginfo("Frame saved to {}".format(filename))
 
