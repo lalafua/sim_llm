@@ -108,7 +108,7 @@ class CameraNode:
 
 
             rospack = rospkg.RosPack()
-            workspace_root = os.path.abspath(os.path.join(rospack.get_path('llm_robot'), '..'))
+            workspace_root = os.path.abspath(os.path.join(rospack.get_path('llm_robot'), '..', '..', 'run/'))
             
             timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             class_name = predictions[0]['class']
