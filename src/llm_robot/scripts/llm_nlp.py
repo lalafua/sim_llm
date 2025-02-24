@@ -6,46 +6,68 @@ from openai import OpenAI
 
 SILICONFLOW_API_KEY = os.getenv("SILICONFLOW_API_KEY")
 PROMPT = """
-    prompt: Hello DeepseekV3! You will receive a text command from a robot. You need to convert it to a json string in plain text.
-    prompt: find the plastic bottle.
-        answer:{
-            "commands":[
-                {
-                    "command": "find",
-                    "parms":{
-                        "object":"plastic bottle"
-                    }
+    You are the most accurate command parser! Your task is to transfer information between human and robot.
+    
+    CLASS_NAME = (
+        'mask',
+        'phone',
+        'bottle',
+        'gloves',
+        'metal',
+        'palstic bag',
+        'sunglasses',
+        'boll',
+        'door',
+        'other',
+    )
+
+    # Instructions
+    - First, Abstracting actionable words from conversations.
+    - Second, Compare the object to the object in CLASS_NAME and choose the word with the closest meaning to replace it.
+    - Finally, Generate a json string.
+
+    # Example
+    conversation: find a garbage bag.
+    answer:{
+        "commands":[
+            {
+                "command": "find",
+                "parms":{
+                    "object":"palstic bag"
                 }
-            ]
-        }
-    prompt: pick up the red boll.
-        answer:{
-            "commands":[
-                {
-                    "command": "pick_up",
-                    "parms":{
-                        "object":"red boll"
-                    }
+            }
+        ]
+    }
+
+    conversation: find my Coke.
+    answer:{
+        "commands":[
+            {
+                "command": "find",
+                "parms":{
+                    "object":"bottle"
                 }
-            ]
-        }
-    prompt: pick up my phone and close the door.
-        answer:{
-            "commands":[
-                {
-                    "command": "pick_up",
-                    "parms":{
-                        "object": "phone"
-                    }
-                },
-                {
-                    "command": "close",
-                    "parms":{
-                        "object": "door"
-                    }
+            }
+        ]
+    }
+
+    conversation: pick up my phone and close the door.
+    answer:{
+        "commands":[
+            {
+                "command": "pick_up",
+                "parms":{
+                    "object": "phone"
                 }
-            ]
-        }
+            },
+            {
+                "command": "close",
+                "parms":{
+                    "object": "door"
+                }
+            }
+        ]
+    }
 """
 
 class NLPNode:
