@@ -7,7 +7,7 @@
 #### DEMO
 
 - Youtube: https://youtu.be/UmF9l2ZmQ8Q
-- Bilibili: https://www.bilibili.com/video/
+- Bilibili: https://www.bilibili.com/video/BV13BPeeSEFg/
 
 主体任务逻辑分三个 `node` 完成：
   
