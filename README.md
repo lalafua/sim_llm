@@ -2,13 +2,13 @@
   
 ### 介绍
   
-该分支基于 ROS1 实现
+该分支基于 ROS1 Noetic 实现
 
 #### DEMO
 
-![](assets/demo.gif)
-  
-#### 任务逻辑
+- Youtube: https://youtu.be/UmF9l2ZmQ8Q
+- Bilibili: https://www.bilibili.com/video/
+
 主体任务逻辑分三个 `node` 完成：
   
 - `llm_nlp node` ：自然语言处理节点。接收用户输入，调用 DeepSeek api ，通过给 AI 合适的 prompt 将自然语言转换为 Json 字符串，并将其作为服务请求发送到 `/trans`。
@@ -73,7 +73,7 @@
   
 #### 运行
   
-打开三个终端
+打开四个终端
 分别运行
 
 ```bash
@@ -88,12 +88,16 @@ rosrun llm_robot llm_nlp.py
 source devel/setup.bash
 roslaunch llm_robot llm_robot.launch
 ```
+```bash
+source devel/setup.bash
+roslaunch llm_robot sim_world.launch
+```
   
 其中， `llm_nlp` 节点会在服务就绪后提示输入 `command` ，输入 `find the bottle` 后，就可以看到 bot 正在寻找 bottle 了（其他指令还没有写，目前只有这一个，不过可以自己训练想要识别的目标）
 
 识别完成之后，识别到物体的帧会以 `{class_name}_{timestamp}.jpg` 的命名方式保存在 `run/` 目录下。
 
-![](run/bottle_20250211-055106.jpg)
+![](run/bottle_20250225-153336.jpg)
   
   
   
