@@ -219,7 +219,7 @@ class llmRobotNode:
                         # Wait for Transform data
                         tf_listener.waitForTransform("map", "base_link", rospy.Time(0), rospy.Duration(3.0))
                         (trans, rot) = tf_listener.lookupTransform("map", "base_link", rospy.Time(0))
-                        rospy.loginfo("Object found: {} at current position: x: {:.2f}, y: {:.2f}, z: {:.2f}".format(
+                        rospy.loginfo("\033[92mObject found: {} at current position: x: {:.2f}, y: {:.2f}, z: {:.2f}\033[0m".format(
                             object, trans[0], trans[1], trans[2]
                         ))
                     except Exception as e:
