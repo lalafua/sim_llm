@@ -27,7 +27,7 @@ PROMPT = """
     - Finally, Generate a json string.
 
     # Example
-    conversation: find a garbage bag.
+    conversation: give me a garbage bag.
     answer:{
         "commands":[
             {
@@ -35,6 +35,12 @@ PROMPT = """
                 "parms":{
                     "object":"palstic bag"
                 }
+            }
+            {
+                "command": "give",
+                "parms":{
+                    "object":"palstic bag"
+                
             }
         ]
     }

@@ -8,6 +8,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 import tf
 from actionlib.simple_action_client import SimpleActionClient, SimpleGoalState
 
+
 class ModSimpleActionClient(SimpleActionClient):
     def __init__(self, ns, ActionSpec):
         super(ModSimpleActionClient, self).__init__(ns, ActionSpec)
@@ -102,6 +103,10 @@ class llmRobotNode:
             return transResponse(is_success=False)
         
         try:
+            # Ensure the parser is ready
+            self.parser_success = False
+            self.parser_event.clear()
+
             self.parser_map(request.command)
             self.parser_event.wait()
             return transResponse(is_success=self.parser_success)
@@ -171,8 +176,6 @@ class llmRobotNode:
         """
 
         rospy.loginfo("Start finding :{}".format(object))
-        self.parser_success = False 
-        self.parser_event.clear()
         
         patrol_points = [
             [(-4,-3,0.0),(0.0,0.0,100.0)],
@@ -213,7 +216,7 @@ class llmRobotNode:
                     self.parser_success = True
                     self.parser_event.set()
                     try:
-                        # 等待获取 transform 数据
+                        # Wait for Transform data
                         tf_listener.waitForTransform("map", "base_link", rospy.Time(0), rospy.Duration(3.0))
                         (trans, rot) = tf_listener.lookupTransform("map", "base_link", rospy.Time(0))
                         rospy.loginfo("Object found: {} at current position: x: {:.2f}, y: {:.2f}, z: {:.2f}".format(

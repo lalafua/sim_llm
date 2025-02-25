@@ -1,0 +1,5 @@
+<launch>
+    <!-- Launch world file and spawn robot-->
+    <include file="$(find robot_sim_demo)/launch/robot_spawn.launch" />
+    <include file="$(find navigation_sim_demo)/launch/navigation_demo.launch" />
+</launch>

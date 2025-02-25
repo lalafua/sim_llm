@@ -2,7 +2,4 @@
     <node name="camera_node" pkg="llm_robot" type="camera.py" output="screen" />
     <!-- node name="nlp_node" pkg="llm_robot" type="llm_nlp.py" output="screen" / -->
     <node name="llm_robot_node" pkg="llm_robot" type="llm_run.py" output="screen" />
-
-    <include file="$(find robot_sim_demo)/launch/robot_spawn.launch" />
-    <include file="$(find navigation_sim_demo)/launch/navigation_demo.launch" />
 </launch>
