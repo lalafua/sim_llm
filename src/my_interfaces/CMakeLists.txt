@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 cmake_policy(SET CMP0148 NEW)
 project(my_interfaces)
 
+find_package(PythonInterp REQUIRED)
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
