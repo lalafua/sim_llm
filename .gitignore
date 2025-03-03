@@ -1,6 +1,7 @@
 build/
 install/
 log/
+.vscode/
 
 src/llm_robot/llm_robot/test.py
 
