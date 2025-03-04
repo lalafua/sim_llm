@@ -61,7 +61,6 @@ class cameraNode(Node):
                     self.update_detection(predictions)
                 except Exception as e:
                     self.get_logger.error("Prediction error: %s", e)
-    
     def timer_callback(self):
         msg = String()
         if self.detection["class_name"]:
