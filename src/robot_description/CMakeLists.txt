@@ -11,15 +11,8 @@ find_package(xacro REQUIRED)
 find_package(urdf REQUIRED)
 find_package(robot_state_publisher REQUIRED)
 
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-)
-
-install(DIRECTORY urdf
-  DESTINATION share/${PROJECT_NAME}
-)
-
-install(DIRECTORY meshes
+install(
+  DIRECTORY launch meshes rviz urdf parms
   DESTINATION share/${PROJECT_NAME}
 )
 
