@@ -20,7 +20,7 @@
     </physics>
 
     <include>
-      <uri>model://sun</uri>
+      <uri>model://Sun</uri>
     </include>
 
     <include>
