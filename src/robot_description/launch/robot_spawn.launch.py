@@ -1,6 +1,6 @@
 import os 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, SetEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, SetEnvironmentVariable, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
@@ -33,16 +33,12 @@ def generate_launch_description():
         description='World file to load for gazebo'
     )
 
-    gazebo = Node(
-        package='gazebo_ros',
-        executable='gazebo',
-        output='screen',
-        arguments=[
-            '--verbose',
-            '-s', 'libgazebo_ros_init.so', 
-            '-s', 'libgazebo_ros_factory.so',
-            LaunchConfiguration('world')
-            ] 
+    gazebo = ExecuteProcess(
+        cmd=['gazebo', '--verbose',
+             '-s', 'libgazebo_ros_init.so',
+             '-s', 'libgazebo_ros_factory.so',
+             LaunchConfiguration('world')],
+        output='screen'
     )
 
     ld.add_action(gazebo_model_env)
