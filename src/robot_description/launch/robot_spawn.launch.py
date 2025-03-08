@@ -26,12 +26,35 @@ def generate_launch_description():
         value=[gazebo_model_path, ":", "$GAZEBO_MODEL_PATH"]    
         )
     
-    # Declare the launch arguments  
-    world_declare = DeclareLaunchArgument(
+    # gazebo auguments declare
+
+    # world file declare
+    declare_world = DeclareLaunchArgument(
         name='world',
         default_value=world_file_path,
         description='World file to load for gazebo'
     )
+
+    # simulator declare
+    declare_simulator = DeclareLaunchArgument(
+    name='headless',
+    default_value='False',
+    description='Whether to execute gzclient'
+    )
+     
+    # use_sim_time declare
+    declare_use_sim_time = DeclareLaunchArgument(
+        name='use_sim_time',
+        default_value='true',
+        description='Use simulation (Gazebo) clock if true'
+        )
+    
+    # use simulator declare 
+    declare_use_simulator = DeclareLaunchArgument(
+        name='use_simulator',
+        default_value='True',
+        description='Whether to start the simulator'
+        )
 
     gazebo = ExecuteProcess(
         cmd=['gazebo', '--verbose',
@@ -42,7 +65,7 @@ def generate_launch_description():
     )
 
     ld.add_action(gazebo_model_env)
-    ld.add_action(world_declare)
+    ld.add_action(declare_world)
     ld.add_action(gazebo)
 
     return ld
