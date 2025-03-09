@@ -13,7 +13,6 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     # package share direactory path
-    gazebo_ros_share = get_package_share_directory('gazebo_ros')
     robot_description_share = get_package_share_directory(package_name=package_name)
 
     # world file path
@@ -55,7 +54,7 @@ def generate_launch_description():
     #     description='Whether to start the simulator'
     #     )
 
-    gazebo = ExecuteProcess(
+    gazebo_server = ExecuteProcess(
         cmd=['gazebo', '--verbose',
              '-s', 'libgazebo_ros_init.so',
              '-s', 'libgazebo_ros_factory.so',
@@ -63,8 +62,15 @@ def generate_launch_description():
         output='screen'
     )
 
+    gazebo_entity_spawn = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(robot_description_share, 'launch', 'xbot-u.launch.py')
+        )
+    )
+    
     ld.add_action(gazebo_model_env)
     ld.add_action(gazebo_declare_world)
-    ld.add_action(gazebo)
+    ld.add_action(gazebo_server)
+    ld.add_action(gazebo_entity_spawn)
 
     return ld
