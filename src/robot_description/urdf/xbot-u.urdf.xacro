@@ -22,7 +22,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://robot_sim_demo/models/meshes/base_link.obj" />
+        <mesh filename="package://robot_description/models/meshes/base_link.obj" />
       </geometry>
     </visual>
 
@@ -91,7 +91,7 @@
     <visual name="left_wheel_visual">
       <origin xyz="0 0 0" rpy="0 0 -1.57079632"/>
       <geometry>
-        <mesh filename="package://robot_sim_demo/models/meshes/wheel.obj" />
+        <mesh filename="package://robot_description/models/meshes/wheel.obj" />
       </geometry>
     </visual>
     <inertial>
@@ -120,7 +120,7 @@
     <visual name="right_wheel_visual">
       <origin xyz="0 0 0" rpy="0 0 1.57079632"/>
       <geometry>
-        <mesh filename="package://robot_sim_demo/models/meshes/wheel.obj" />
+        <mesh filename="package://robot_description/models/meshes/wheel.obj" />
       </geometry>
     </visual>
     <inertial>
@@ -148,7 +148,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 1.57079632" />
       <geometry>
-        <mesh filename="package://robot_sim_demo/models/meshes/yaw_platform.obj" />
+        <mesh filename="package://robot_description/models/meshes/yaw_platform.obj" />
       </geometry>
     </visual>
     <collision>
@@ -177,7 +177,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://robot_sim_demo/models/meshes/pitch_platform.obj" />
+        <mesh filename="package://robot_description/models/meshes/pitch_platform.obj" />
       </geometry>
     </visual>
     <collision>
@@ -208,8 +208,8 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <!--<mesh filename="package://robot_sim_demo/models/meshes/xtion_pro_camera.dae" />-->
-        <mesh filename="package://robot_sim_demo/models/meshes/realsense.obj" />
+        <!--<mesh filename="package://robot_description/models/meshes/xtion_pro_camera.dae" />-->
+        <mesh filename="package://robot_description/models/meshes/realsense.obj" />
       </geometry>
     </visual>
     <inertial>

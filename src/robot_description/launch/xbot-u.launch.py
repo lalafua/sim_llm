@@ -15,7 +15,7 @@ def generate_launch_description():
     robot_description_share = get_package_share_directory(package_name=package_name)
 
     # robot file path
-    robot_file_path = os.path.join(robot_description_share, 'urdf', 'robot.xaxro')
+    robot_file_path = os.path.join(robot_description_share, 'urdf', 'robot.xacro')
 
     # declare arguments
     gazebo_declare_robot = DeclareLaunchArgument(
@@ -49,7 +49,7 @@ def generate_launch_description():
     )
 
     robot_descripton_obj = Command(
-        command=['xacro', LaunchConfiguration('robot')]
+        command=['xacro', ' ', LaunchConfiguration('robot')]
     )
 
     # spawn a robot in gazebo world
@@ -58,7 +58,7 @@ def generate_launch_description():
         executable='spawn_entity.py',
         output='screen',
         arguments=[
-            '-entity', 'xbot-u',
+            '-entity', 'xbot',
             '-x', LaunchConfiguration('robot_x'),
             '-y', LaunchConfiguration('robot_y'),
             '-z', LaunchConfiguration('robot_z'),
@@ -71,7 +71,7 @@ def generate_launch_description():
     state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        namespace='xbot-u',
+        namespace='xbot',
         output='screen',
         parameters=[{
             'robot_description_obj': robot_descripton_obj,
