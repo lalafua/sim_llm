@@ -3,5 +3,5 @@ install/
 log/
 .vscode/
 .venv/
+*.log
 
-src/llm_robot/llm_robot/test.py

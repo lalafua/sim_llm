@@ -44,7 +44,7 @@
 
 
   <!-- camera -->
-    <gazebo reference="camera_link">  
+    <!-- gazebo reference="camera_link" >  
       <sensor type="depth" name="camera">
         <plugin name="kinect_camera_controller" filename="libgazebo_ros_openni_kinect.so">
           <cameraName>camera</cameraName>
@@ -65,7 +65,7 @@
           <pointCloudCutoff>0.4</pointCloudCutoff>
         </plugin>
       </sensor>
-    </gazebo>
+    </gazebo -->
 
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
