@@ -124,11 +124,11 @@
           <max>10.0</max>
           <resolution>0.01</resolution>
         </range>
-        <noise>
+        <!--noise>
           <type>gaussian</type>
           <mean>0.0</mean>
           <stddev>0.01</stddev>
-        </noise>
+        </noise-->
       </ray>
       <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_ray_sensor.so">
         <topicName>${ros_topic}</topicName>

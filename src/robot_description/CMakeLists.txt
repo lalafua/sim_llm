@@ -13,7 +13,7 @@ find_package(robot_state_publisher REQUIRED)
 find_package(gazebo_ros REQUIRED) 
 
 install(
-  DIRECTORY launch meshes rviz urdf parms worlds models
+  DIRECTORY launch rviz urdf parms worlds models
   DESTINATION share/${PROJECT_NAME}
 )
 
