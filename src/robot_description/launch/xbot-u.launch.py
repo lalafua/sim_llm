@@ -5,6 +5,7 @@ from launch.substitutions import LaunchConfiguration, Command
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
 
@@ -16,6 +17,8 @@ def generate_launch_description():
 
     # robot file path
     robot_file_path = os.path.join(robot_description_share, 'urdf', 'robot.xacro')
+
+    robot_description_obj = Command(command=['xacro', ' ', robot_file_path])
 
     # declare arguments
     gazebo_declare_robot = DeclareLaunchArgument(
@@ -48,22 +51,19 @@ def generate_launch_description():
         description='Robot yaw'
     )
 
-    robot_descripton_obj = Command(
-        command=['xacro', ' ', LaunchConfiguration('robot')]
-    )
-
     # spawn a robot in gazebo world
     spawn_robot = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         output='screen',
+        namespace='xbot',
         arguments=[
             '-entity', 'xbot',
             '-x', LaunchConfiguration('robot_x'),
             '-y', LaunchConfiguration('robot_y'),
             '-z', LaunchConfiguration('robot_z'),
             '-Y', LaunchConfiguration('robot_yaw'),
-            '-topic', 'robot_description_obj',
+            '-topic', 'robot_description',
         ]
     )
 
@@ -74,7 +74,7 @@ def generate_launch_description():
         namespace='xbot',
         output='screen',
         parameters=[{
-            'robot_description_obj': robot_descripton_obj,
+            'robot_description': ParameterValue(robot_description_obj, value_type=str),
             'publish_frequency': 20.0,
         }]
     )
