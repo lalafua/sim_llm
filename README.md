@@ -2,7 +2,7 @@
   
 ### 介绍
   
-`sim_llm` 是一个基于 `ROS2` 的仿真测试，使用当下热门的大语言模型控制 `turtle` 做出一些简单的行动。
+此分支在 Riscv 架构上的 openEuler 开发
   
 #### DEMO
 ![](assets/demo.gif)  

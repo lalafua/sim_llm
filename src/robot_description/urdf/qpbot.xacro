@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot name="qpbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Robot Footprint -->
+    <link name="base_footprint"/>
+
+	<xacro:include filename="./qpbot_components.xacro"/>
+
+    <xacro:create_base xyz_offset="0.0 0.0 0.076"/>
+	<xacro:create_wheel prefix="left" xyz_offset="-0.02 0.10 -0.06"/>
+	<xacro:create_wheel prefix="right" xyz_offset="-0.02 -0.10 -0.06"/>
+	<xacro:create_caster xyz_offset="0.06 0.0 -0.076"/>
+
+</robot>
