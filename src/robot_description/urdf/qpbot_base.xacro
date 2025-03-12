@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot name="qpbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="create_base" params="parent_link:=base_footprint xyz_offset:='0 0 0' rpy_offset:='0 0 0'">
+
+        <!-- base joint-->
+        <joint name="base_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="base_link"/>
+            <origin xyz="${xyz_offset}" rpy="${rpy_offset}"/>
+        </joint>
+
+        <!-- base link-->
+        <link name="base_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.12" radius="0.10"/>
+                </geometry>
+                <material name="blue">
+                    <color rgba="0.1 0.1 1.0 0.5" />
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder length="0.12" radius="0.10"/>
+                </geometry>
+                <material name="blue">
+                    <color rgba="0.1 0.1 1.0 0.5" />
+                </material>
+            </collision>
+            <inertial>
+                <mass value="0.2"/>
+                <inertia ixx="0.0122666" ixy="0" ixz="0" iyy="0.0122666" iyz="0" izz="0.02"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+</robot>

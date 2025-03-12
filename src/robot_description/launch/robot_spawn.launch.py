@@ -55,7 +55,7 @@ def generate_launch_description():
     #     )
 
     gazebo_server = ExecuteProcess(
-        cmd=['gazebo', '--verbose',
+        cmd=['gazebo', '--verbose', '--no-model-check',
              '-s', 'libgazebo_ros_init.so',
              '-s', 'libgazebo_ros_factory.so',
              LaunchConfiguration('world')],
