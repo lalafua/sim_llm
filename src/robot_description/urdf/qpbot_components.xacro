@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot name="qpbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- base macro-->
     <xacro:macro name="create_base" params="parent_link:=base_footprint xyz_offset:='0 0 0' rpy_offset:='0 0 0'">
 
         <!-- base joint-->
@@ -37,6 +38,8 @@
         </link>
     </xacro:macro>
 
+
+    <!-- wheel macro-->
     <xacro:macro name="create_wheel" params="parent_link:=base_link prefix xyz_offset:='0 0 0' rpy_offset='0 0 0' axix=:'0 1 0'">
         
         <!-- wheel joint -->
@@ -74,6 +77,8 @@
         </link>
     </xacro:macro>
 
+
+    <!-- caster marcro -->
     <xacro:macro name="create_caster" params="parent_link:=base_link xyz_offset:='0 0 0' rpy_offset:='0 0 0' axix=:'0 1 0'">
     
         <!-- caster joint-->
@@ -109,5 +114,81 @@
             </inertial>
         </link>
     </xacro:macro>
+
+
+    <!-- imu macro -->
+    <xacro:macro name="create_imu" params="parent_link:=base_link xyz_offset:='0 0 0.02' rpy_offset:='0 0 0'">
+    
+        <!-- imu joint-->
+        <joint name="imu_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="imu_link"/>
+            <origin xyz="${xyz_offset}" rpy="${rpy_offset}"/>
+        </joint>
+
+        <!-- imu link-->
+        <link name="imu_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.02"/>
+                </geometry>
+                <material name="black">
+                    <color rgba="0.0 0.0 0.0 0.0" /> 
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.02"/>
+                </geometry>
+                <material name="black">
+                    <color rgba="0.0 0.0 0.0 0.0" /> 
+                </material>
+            </collision>
+            <inertial>
+                <mass value="0.1"/>
+                <inertia ixx="0.000190416666667" ixy="0" ixz="0" iyy="0.0001904" iyz="0" izz="0.00036"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <!-- laser macro-->
+    <xacro:macro name="create_laser" params="parent_link:=base_link xyz_offset:='0 0 0.02' rpy_offset:='0 0 0'">
+    
+        <!-- laser joint-->
+        <joint name="imu_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="laser_link"/>
+            <origin xyz="${xyz_offset}" rpy="${rpy_offset}"/>
+        </joint>
+
+        <!-- laser link-->
+        <link name="imu_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.02"/>
+                </geometry>
+                <material name="black">
+                    <color rgba="0.0 0.0 0.0 0.0" /> 
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.02"/>
+                </geometry>
+                <material name="black">
+                    <color rgba="0.0 0.0 0.0 0.0" /> 
+                </material>
+            </collision>
+            <inertial>
+                <mass value="0.1"/>
+                <inertia ixx="0.000190416666667" ixy="0" ixz="0" iyy="0.0001904" iyz="0" izz="0.00036"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
 
 </robot>
