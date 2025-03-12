@@ -14,10 +14,10 @@
 	<xacro:create_imu xyz_offset="0.0 0.0 0.02"/>
 	<xacro:create_laser xyz_offset="0.0 0.0 0.075"/>
 
-
+	
 	<!-- gazebo settings -->
 	
-	<!-- caster setting -->
+	<!--caster setting -->
 	<gazebo reference="caster_link">
 		<material>Gazebo/Black</material>
 		<mu1 value="0.0"/>
@@ -56,7 +56,7 @@
 	<!-- imu setting-->
 	<gazebo reference="imu_link">
 		<sensor name="imu_sensor" type="imu">
-			<plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+			<plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so" >
 				<ros>
 					<namespace>/</namepsace>
 					<remapping>~/out:=imu</remapping>
@@ -69,7 +69,7 @@
 			<imu>
 				<angular_velocity>
 					<x>
-						<nosie type="gaussian">
+						<noise type="gaussian">
 							<mean>0.0</mean>
 							<stddev>2e-4</stddev>
                 			<bias_mean>0.0000075</bias_mean>
@@ -127,7 +127,7 @@
 	<gazebo reference="laser_link">
 		<sensor name="laser_sensor" type="ray">
 			<always_on>true</always_on>
-			<visualize>trur</visualize>
+			<visualize>true</visualize>
 			<update_rate>10<update_rate>
 			<pose>0 0 0.075 0 0 0<pose>
 			<ray>
@@ -138,7 +138,7 @@
 						<min_angle>0.000000</min_angle>
 						<max_angle>6.280000</max_angle>
 					</horizontal>
-				<scan>
+				</scan>
 				<range>
 					<min>0.120000</min>
 					<max>3.500000</max>
@@ -151,7 +151,7 @@
 			</ray>
 			<plugin name="laserscan" filename="libgazebo_ros_ray_sensor.so">
 				<ros>
-					<remapping>scan:=scan</remapping>
+					<remapping>~/out:=scan</remapping>
 				</ros>
 				<output_type>sensor_msgs/LaserScan</output_type>
         		<frame_name>laser_link</frame_name>

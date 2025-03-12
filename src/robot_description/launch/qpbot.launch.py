@@ -16,9 +16,9 @@ def generate_launch_description():
     robot_description_share = get_package_share_directory(package_name=package_name)
 
     # robot file path
-    robot_file_path = os.path.join(robot_description_share, 'urdf', 'robot.xacro')
+    robot_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.xacro')
 
-    robot_description_obj = Command(command=['xacro', ' ', robot_file_path])
+    robot_description_obj = ParameterValue(Command(command=['xacro', ' ', robot_file_path]), value_type=str)
 
     # declare arguments
     gazebo_declare_robot = DeclareLaunchArgument(
@@ -55,28 +55,32 @@ def generate_launch_description():
     spawn_robot = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        output='screen',
-        namespace='xbot',
+        output='screen', 
         arguments=[
-            '-entity', 'xbot',
+            '-entity', 'qpbot',
+            '-file', LaunchConfiguration('robot'),
             '-x', LaunchConfiguration('robot_x'),
             '-y', LaunchConfiguration('robot_y'),
             '-z', LaunchConfiguration('robot_z'),
             '-Y', LaunchConfiguration('robot_yaw'),
-            '-topic', 'robot_description',
         ]
     )
 
-    # publish robot state (TF) to the topic robot_description_obj
+    # publish robot state (TF) to the topic robot_description
     state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        namespace='xbot',
         output='screen',
         parameters=[{
-            'robot_description': ParameterValue(robot_description_obj, value_type=str),
-            'publish_frequency': 20.0,
+            'robot_description': robot_description_obj
         }]
+    )
+
+    # Rviz node
+    rviz = Node(
+        package='rviz2',
+        executable='rviz2',
+        output='screen',
     )
 
     ld.add_action(gazebo_declare_robot)
@@ -86,5 +90,6 @@ def generate_launch_description():
     ld.add_action(gazebo_declare_robot_yaw)
     ld.add_action(spawn_robot)
     ld.add_action(state_publisher)
+    ld.add_action(rviz)
 
     return ld

@@ -33,27 +33,6 @@ def generate_launch_description():
         description='World file to load for gazebo'
     )
 
-    # # simulator declare
-    # gazebo_declare_simulator = DeclareLaunchArgument(
-    # name='headless',
-    # default_value='False',
-    # description='Whether to execute gzclient'
-    # )
-     
-    # # use_sim_time declare
-    # gazebo_declare_use_sim_time = DeclareLaunchArgument(
-    #     name='use_sim_time',
-    #     default_value='true',
-    #     description='Use simulation (Gazebo) clock if true'
-    # )
-    
-    # # use simulator declare 
-    # gazebo_declare_use_simulator = DeclareLaunchArgument(
-    #     name='use_simulator',
-    #     default_value='True',
-    #     description='Whether to start the simulator'
-    #     )
-
     gazebo_server = ExecuteProcess(
         cmd=['gazebo', '--verbose', '--no-model-check',
              '-s', 'libgazebo_ros_init.so',
