@@ -58,7 +58,7 @@
 		<sensor name="imu_sensor" type="imu">
 			<plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so" >
 				<ros>
-					<namespace>/</namepsace>
+					<namespace>/</namespace>
 					<remapping>~/out:=imu</remapping>
 				</ros>
 				<initial_orientation_as_reference>flase</initial_orientation_as_reference>
@@ -128,8 +128,8 @@
 		<sensor name="laser_sensor" type="ray">
 			<always_on>true</always_on>
 			<visualize>true</visualize>
-			<update_rate>10<update_rate>
-			<pose>0 0 0.075 0 0 0<pose>
+			<update_rate>10</update_rate>
+			<pose>0 0 0.075 0 0 0</pose>
 			<ray>
 				<scan>
 					<horizontal>

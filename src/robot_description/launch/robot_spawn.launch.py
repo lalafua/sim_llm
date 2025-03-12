@@ -43,7 +43,7 @@ def generate_launch_description():
 
     gazebo_entity_spawn = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(robot_description_share, 'launch', 'xbot-u.launch.py')
+            os.path.join(robot_description_share, 'launch', 'qpbot.launch.py')
         )
     )
     

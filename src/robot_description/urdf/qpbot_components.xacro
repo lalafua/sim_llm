@@ -40,14 +40,14 @@
 
 
     <!-- wheel macro-->
-    <xacro:macro name="create_wheel" params="parent_link:=base_link prefix xyz_offset:='0 0 0' rpy_offset='0 0 0' axix=:'0 1 0'">
+    <xacro:macro name="create_wheel" params="parent_link:=base_link prefix xyz_offset:='0 0 0' rpy_offset='0 0 0' axis='0 1 0'">
         
         <!-- wheel joint -->
         <joint name="${prefix}_wheel_joint" type="continuous">
             <parent link="${parent_link}"/>
             <child link="${prefix}_wheel_link"/>
             <origin xyz="${xyz_offset}"/>
-            <axis xyz="${axix}"/>
+            <axis xyz="${axis}"/>
         </joint>
 
         <!-- wheel link -->
@@ -79,7 +79,7 @@
 
 
     <!-- caster marcro -->
-    <xacro:macro name="create_caster" params="parent_link:=base_link xyz_offset:='0 0 0' rpy_offset:='0 0 0' axix=:'0 1 0'">
+    <xacro:macro name="create_caster" params="parent_link:=base_link xyz_offset:='0 0 0' rpy_offset:='0 0 0' axis='0 1 0'">
     
         <!-- caster joint-->
         <joint name="caster_joint" type="fixed">
