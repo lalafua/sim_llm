@@ -21,7 +21,7 @@ def generate_launch_description():
 
     # convert xacro to urdf
     xacro_to_urdf = ExecuteProcess(
-        cmd=['xacro', ' ', xacro_file_path, ' ', '-o', ' ', urdf_file_path],
+        cmd=['xacro', xacro_file_path, '-o',urdf_file_path],
         output='screen'
     )
 
