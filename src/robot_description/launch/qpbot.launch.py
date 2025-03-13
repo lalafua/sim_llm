@@ -7,6 +7,8 @@ from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
+RVIZ2_SHOW = False
+
 def generate_launch_description():
 
     package_name = 'robot_description'
@@ -58,6 +60,7 @@ def generate_launch_description():
 
     # spawn a robot in gazebo world
     spawn_robot = Node(
+        name='spawn_robot',
         package='gazebo_ros',
         executable='spawn_entity.py',
         output='screen', 
@@ -73,18 +76,23 @@ def generate_launch_description():
 
     # publish robot state (TF) to the topic robot_description
     state_publisher = Node(
+        name='state_publisher',
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
         arguments=[urdf_file_path]
     )
 
-    # # Rviz node
-    # rviz = Node(
-    #     package='rviz2',
-    #     executable='rviz2',
-    #     output='screen',
-    # )
+    # Rviz2 node
+    rviz2 = Node(
+        name='rviz2',
+        package='rviz2',
+        executable='rviz2',
+        output='screen',
+        arguments=[
+            '-d', os.path.join(robot_description_share, 'rviz', 'qpbot.rviz')
+        ]
+    )
 
     ld.add_action(xacro_to_urdf)
     ld.add_action(gazebo_declare_robot)
@@ -94,6 +102,8 @@ def generate_launch_description():
     ld.add_action(gazebo_declare_robot_yaw)
     ld.add_action(spawn_robot)
     ld.add_action(state_publisher)
-    #ld.add_action(rviz)
+    
+    if RVIZ2_SHOW:
+        ld.add_action(rviz2)
 
     return ld
