@@ -16,12 +16,19 @@ def generate_launch_description():
     robot_description_share = get_package_share_directory(package_name=package_name)
 
     # robot file path
-    robot_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.urdf')
+    xacro_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.xacro')
+    urdf_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.urdf')
+
+    # convert xacro to urdf
+    xacro_to_urdf = ExecuteProcess(
+        cmd=['xacro', ' ', xacro_file_path, ' ', '-o', ' ', urdf_file_path],
+        output='screen'
+    )
 
     # declare arguments
     gazebo_declare_robot = DeclareLaunchArgument(
         name='robot',
-        default_value=robot_file_path,
+        default_value=urdf_file_path,
         description='Robot file to load for gazebo'
     )
 
@@ -69,7 +76,7 @@ def generate_launch_description():
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
-        arguments=[robot_file_path]
+        arguments=[urdf_file_path]
     )
 
     # # Rviz node
@@ -79,6 +86,7 @@ def generate_launch_description():
     #     output='screen',
     # )
 
+    ld.add_action(xacro_to_urdf)
     ld.add_action(gazebo_declare_robot)
     ld.add_action(gazebo_declare_robot_x)
     ld.add_action(gazebo_declare_robot_y)

@@ -8,11 +8,11 @@
 
 	<!-- load components-->
     <xacro:create_base xyz_offset="0.0 0.0 0.076"/>
-	<xacro:create_wheel prefix="left" xyz_offset="-0.02 0.10 -0.06"/>
-	<xacro:create_wheel prefix="right" xyz_offset="-0.02 -0.10 -0.06"/>
-	<xacro:create_caster xyz_offset="0.06 0.0 -0.076"/>
-	<xacro:create_imu xyz_offset="0.0 0.0 0.02"/>
-	<xacro:create_laser xyz_offset="0.0 0.0 0.075"/>
+	<xacro:create_wheel prefix="left" parent_link="base_link" xyz_offset="-0.02 0.10 -0.06"/>
+	<xacro:create_wheel prefix="right" parent_link="base_link" xyz_offset="-0.02 -0.10 -0.06"/>
+	<xacro:create_caster parent_link="base_link" xyz_offset="0.06 0.0 -0.076"/>
+	<xacro:create_imu parent_link="base_link" xyz_offset="0.0 0.0 0.02"/>
+	<xacro:create_laser parent_link="base_link" xyz_offset="0.0 0.0 0.075"/>
 
 	
 	<!-- gazebo settings -->
@@ -133,10 +133,10 @@
 			<ray>
 				<scan>
 					<horizontal>
-						<samples>360</samples>
+						<samples>180</samples>
 						<resolution>1.000000</resolution>
 						<min_angle>0.000000</min_angle>
-						<max_angle>6.280000</max_angle>
+						<max_angle>3.140000</max_angle>
 					</horizontal>
 				</scan>
 				<range>
@@ -144,7 +144,8 @@
 					<max>3.500000</max>
 					<resolution>0.015000</resolution>
 				</range>
-				<noise type="gaussian">
+				<noise>
+					<type>gaussian</type>
 					<mean>0.0</mean>
 					<stddev>0.01</stddev>
 				</noise>
