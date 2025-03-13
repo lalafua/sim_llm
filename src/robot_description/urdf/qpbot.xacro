@@ -61,7 +61,7 @@
 					<namespace>/</namespace>
 					<remapping>~/out:=imu</remapping>
 				</ros>
-				<initial_orientation_as_reference>flase</initial_orientation_as_reference>
+				<initial_orientation_as_reference>false</initial_orientation_as_reference>
 			</plugin>
 			<always_on>true</always_on>
 			<update_rate>100</update_rate>
@@ -133,10 +133,10 @@
 			<ray>
 				<scan>
 					<horizontal>
-						<samples>180</samples>
+						<samples>90</samples>
 						<resolution>1.000000</resolution>
 						<min_angle>0.000000</min_angle>
-						<max_angle>3.140000</max_angle>
+						<max_angle>6.280000</max_angle>
 					</horizontal>
 				</scan>
 				<range>
