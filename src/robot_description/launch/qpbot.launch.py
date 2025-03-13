@@ -7,6 +7,8 @@ from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
+RVIZ2_SHOW = False
+
 def generate_launch_description():
 
     package_name = 'robot_description'
@@ -16,14 +18,19 @@ def generate_launch_description():
     robot_description_share = get_package_share_directory(package_name=package_name)
 
     # robot file path
-    robot_file_path = os.path.join(robot_description_share, 'urdf', 'robot.xacro')
+    xacro_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.xacro')
+    urdf_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.urdf')
 
-    robot_description_obj = Command(command=['xacro', ' ', robot_file_path])
+    # convert xacro to urdf
+    xacro_to_urdf = ExecuteProcess(
+        cmd=['xacro', xacro_file_path, '-o',urdf_file_path],
+        output='screen'
+    )
 
     # declare arguments
     gazebo_declare_robot = DeclareLaunchArgument(
         name='robot',
-        default_value=robot_file_path,
+        default_value=urdf_file_path,
         description='Robot file to load for gazebo'
     )
 
@@ -53,32 +60,41 @@ def generate_launch_description():
 
     # spawn a robot in gazebo world
     spawn_robot = Node(
+        name='spawn_robot',
         package='gazebo_ros',
         executable='spawn_entity.py',
-        output='screen',
-        namespace='xbot',
+        output='screen', 
         arguments=[
-            '-entity', 'xbot',
+            '-entity', 'qpbot',
+            '-file', LaunchConfiguration('robot'),
             '-x', LaunchConfiguration('robot_x'),
             '-y', LaunchConfiguration('robot_y'),
             '-z', LaunchConfiguration('robot_z'),
             '-Y', LaunchConfiguration('robot_yaw'),
-            '-topic', 'robot_description',
         ]
     )
 
-    # publish robot state (TF) to the topic robot_description_obj
+    # publish robot state (TF) to the topic robot_description
     state_publisher = Node(
+        name='state_publisher',
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        namespace='xbot',
         output='screen',
-        parameters=[{
-            'robot_description': ParameterValue(robot_description_obj, value_type=str),
-            'publish_frequency': 20.0,
-        }]
+        arguments=[urdf_file_path]
     )
 
+    # Rviz2 node
+    rviz2 = Node(
+        name='rviz2',
+        package='rviz2',
+        executable='rviz2',
+        output='screen',
+        arguments=[
+            '-d', os.path.join(robot_description_share, 'rviz', 'qpbot.rviz')
+        ]
+    )
+
+    ld.add_action(xacro_to_urdf)
     ld.add_action(gazebo_declare_robot)
     ld.add_action(gazebo_declare_robot_x)
     ld.add_action(gazebo_declare_robot_y)
@@ -86,5 +102,8 @@ def generate_launch_description():
     ld.add_action(gazebo_declare_robot_yaw)
     ld.add_action(spawn_robot)
     ld.add_action(state_publisher)
+    
+    if RVIZ2_SHOW:
+        ld.add_action(rviz2)
 
     return ld
