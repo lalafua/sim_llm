@@ -88,7 +88,7 @@ def generate_launch_description():
         package='rviz2',
         executable='rviz2',
         output='screen',
-        #arguments=['-d', os.path.join(package_share, 'rviz2', 'cartographer.rviz')],
+        arguments=['-d', os.path.join(package_share, 'rviz2', 'cartographer.rviz')],
     )
 
     ld.add_action(cartographer_node)
