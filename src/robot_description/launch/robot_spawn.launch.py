@@ -41,9 +41,18 @@ def generate_launch_description():
         output='screen'
     )
 
+    # spawn qpbot in gazebo world
     gazebo_entity_spawn = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(robot_description_share, 'launch', 'qpbot.launch.py')
+        )
+    )
+
+
+    # cartographer slam
+    cartographer_slam = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(robot_description_share, 'launch', 'cartographer.launch.py')
         )
     )
     
@@ -51,5 +60,6 @@ def generate_launch_description():
     ld.add_action(gazebo_declare_world)
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_entity_spawn)
+    ld.add_action(cartographer_slam)
 
     return ld

@@ -13,7 +13,7 @@ find_package(robot_state_publisher REQUIRED)
 find_package(gazebo_ros REQUIRED) 
 
 install(
-  DIRECTORY launch rviz urdf worlds models
+  DIRECTORY launch rviz2 urdf worlds models config
   DESTINATION share/${PROJECT_NAME}
 )
 
