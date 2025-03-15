@@ -5,7 +5,7 @@ from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 
-RVIZ2_ENABLE = False
+ENABLE_RVIZ2 = False
 
 def generate_launch_description():
 
@@ -101,7 +101,7 @@ def generate_launch_description():
     ld.add_action(spawn_robot)
     ld.add_action(state_publisher)
     
-    if RVIZ2_ENABLE:
+    if ENABLE_RVIZ2:
         ld.add_action(rviz2_node)
 
     return ld

@@ -6,6 +6,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 
+ENABLE_SLAM = True
+
 def generate_launch_description():
 
     package_name = 'robot_description'
@@ -60,6 +62,8 @@ def generate_launch_description():
     ld.add_action(gazebo_declare_world)
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_entity_spawn)
-    ld.add_action(cartographer_slam)
+
+    if ENABLE_SLAM:
+        ld.add_action(cartographer_slam)
 
     return ld

@@ -5,6 +5,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
+
 package_name = 'robot_description'
 package_share = get_package_share_directory(package_name=package_name)
 
