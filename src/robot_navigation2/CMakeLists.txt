@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(robot_description)
+project(robot_navigation2)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,17 +7,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(xacro REQUIRED)
-find_package(urdf REQUIRED)
-find_package(robot_state_publisher REQUIRED)
-find_package(gazebo_ros REQUIRED)
-find_package(cartographer REQUIRED)
-find_package(cartographer_ros REQUIRED)
-
-install(
-  DIRECTORY launch rviz2 urdf worlds models config
-  DESTINATION share/${PROJECT_NAME}
-)
+find_package(nav2_bringup REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
