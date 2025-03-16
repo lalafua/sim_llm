@@ -13,8 +13,9 @@ def generate_launch_description():
     
     robot_navigation2_dir = get_package_share_directory(package_name='robot_navigation2')
     nav2_bringup_dir = get_package_share_directory(package_name='nav2_bringup')
+    robot_description_dir = get_package_share_directory(package_name='robot_description')
 
-    map_dir = os.path.join(robot_navigation2_dir, 'map')
+    map_dir = os.path.join(robot_description_dir, 'map')
     param_dir = os.path.join(robot_navigation2_dir, 'param')
     rviz2_dir = os.path.join(robot_navigation2_dir, 'rviz2')
 
@@ -30,7 +31,7 @@ def generate_launch_description():
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
-        default_value=True,
+        default_value='true',
         description='Use simulation (Gazebo) clock if true'
     )
 
