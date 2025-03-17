@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /RobotModel1
       Splitter Ratio: 0.5
     Tree Height: 439
   - Class: rviz_common/Selection
@@ -46,6 +47,27 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz_default_plugins/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map
+      Update Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /map_updates
+      Use Timestamp: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -68,7 +90,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.029999999329447746
+      Size (m): 0.009999999776482582
       Style: Flat Squares
       Topic:
         Depth: 5
@@ -80,51 +102,43 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-    - Class: rviz_default_plugins/TF
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
       Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: true
-        base_footprint:
-          Value: true
-        base_link:
-          Value: true
-        caster_link:
-          Value: true
-        imu_link:
-          Value: true
-        laser_link:
-          Value: true
-        left_wheel_link:
-          Value: true
-        odom:
-          Value: true
-        right_wheel_link:
-          Value: true
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: false
-      Tree:
-        odom:
-          base_footprint:
-            base_link:
-              caster_link:
-                {}
-              imu_link:
-                {}
-              laser_link:
-                {}
-            left_wheel_link:
-              {}
-            right_wheel_link:
-              {}
-      Update Interval: 0
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /scan_matched_points2
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
-      Collision Enabled: true
+      Collision Enabled: false
       Description File: ""
       Description Source: Topic
       Description Topic:
@@ -132,14 +146,48 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: ""
+        Value: /robot_description
       Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
-        Link Tree Style: ""
+        Link Tree Style: Links in Alphabetic Order
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        caster_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        laser_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -148,30 +196,10 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Alpha: 1
-      Axes Length: 1
-      Axes Radius: 0.10000000149011612
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Arrow
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /goal_pose
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -214,25 +242,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 10.00301456451416
+      Distance: 7.1160197257995605
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.15433204174041748
-        Y: 0.7558079361915588
-        Z: -0.9974530339241028
+        X: 0
+        Y: 0
+        Z: 0
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3803981840610504
+      Pitch: 0.7903979420661926
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.13539676368236542
+      Yaw: 1.4853975772857666
     Saved: ~
 Window Geometry:
   Displays:

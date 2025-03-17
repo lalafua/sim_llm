@@ -6,6 +6,8 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 
+ENABLE_SLAM = False
+
 def generate_launch_description():
 
     package_name = 'robot_description'
@@ -41,9 +43,18 @@ def generate_launch_description():
         output='screen'
     )
 
+    # spawn qpbot in gazebo world
     gazebo_entity_spawn = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(robot_description_share, 'launch', 'qpbot.launch.py')
+        )
+    )
+
+
+    # cartographer slam
+    cartographer_slam = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(robot_description_share, 'launch', 'cartographer.launch.py')
         )
     )
     
@@ -51,5 +62,8 @@ def generate_launch_description():
     ld.add_action(gazebo_declare_world)
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_entity_spawn)
+
+    if ENABLE_SLAM:
+        ld.add_action(cartographer_slam)
 
     return ld

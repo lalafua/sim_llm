@@ -1,13 +1,11 @@
 import os 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, SetEnvironmentVariable, ExecuteProcess
-from launch.substitutions import LaunchConfiguration, Command
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 
-RVIZ2_SHOW = False
+ENABLE_RVIZ2 = False
 
 def generate_launch_description():
 
@@ -15,11 +13,11 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
-    robot_description_share = get_package_share_directory(package_name=package_name)
+    package_share = get_package_share_directory(package_name=package_name)
 
     # robot file path
-    xacro_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.xacro')
-    urdf_file_path = os.path.join(robot_description_share, 'urdf', 'qpbot.urdf')
+    xacro_file_path = os.path.join(package_share, 'urdf', 'qpbot.xacro')
+    urdf_file_path = os.path.join(package_share, 'urdf', 'qpbot.urdf')
 
     # convert xacro to urdf
     xacro_to_urdf = ExecuteProcess(
@@ -84,13 +82,13 @@ def generate_launch_description():
     )
 
     # Rviz2 node
-    rviz2 = Node(
+    rviz2_node = Node(
         name='rviz2',
         package='rviz2',
         executable='rviz2',
         output='screen',
         arguments=[
-            '-d', os.path.join(robot_description_share, 'rviz', 'qpbot.rviz')
+            '-d', os.path.join(package_share, 'rviz2', 'qpbot.rviz')
         ]
     )
 
@@ -103,7 +101,7 @@ def generate_launch_description():
     ld.add_action(spawn_robot)
     ld.add_action(state_publisher)
     
-    if RVIZ2_SHOW:
-        ld.add_action(rviz2)
+    if ENABLE_RVIZ2:
+        ld.add_action(rviz2_node)
 
     return ld
