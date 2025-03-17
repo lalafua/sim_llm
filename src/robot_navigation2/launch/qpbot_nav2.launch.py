@@ -23,6 +23,11 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     param_file = LaunchConfiguration('param_file')
 
+    robot_x = LaunchConfiguration('robot_x')
+    robot_y = LaunchConfiguration('robot_y')
+    robot_z = LaunchConfiguration('robot_z')
+    robot_a = LaunchConfiguration('robot_a')
+
     declare_map_file_cmd = DeclareLaunchArgument(
         name='map_file',
         default_value=os.path.join(map_dir, 'ISCAS_Museum.yaml'),
@@ -53,7 +58,11 @@ def generate_launch_description():
         name='amcl',
         package='nav2_amcl',
         executable='amcl',
-        
+        parameters=[{
+            'initial_pose/x':robot_x,
+            'initial_pose/y':robot_y,
+            'initial_pose/a':robot_a
+        }]
     )
 
     ld.add_action(declare_map_file_cmd)
@@ -61,5 +70,6 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
 
     ld.add_action(nav2_bringup_launch)
+    ld.add_action(amcl_node)
 
     return ld
