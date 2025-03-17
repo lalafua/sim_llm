@@ -49,6 +49,13 @@ def generate_launch_description():
         }.items()
     )
 
+    amcl_node = Node(
+        name='amcl',
+        package='nav2_amcl',
+        executable='amcl',
+        
+    )
+
     ld.add_action(declare_map_file_cmd)
     ld.add_action(declare_param_file_cmd)
     ld.add_action(declare_use_sim_time_cmd)

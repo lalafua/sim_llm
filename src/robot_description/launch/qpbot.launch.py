@@ -6,18 +6,20 @@ from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 
 ENABLE_RVIZ2 = False
+package_name = 'robot_description'
 
 def generate_launch_description():
-
-    package_name = 'robot_description'
-
     ld = LaunchDescription()
 
-    package_share = get_package_share_directory(package_name=package_name)
+    robot_description_dir = get_package_share_directory(package_name='robot_description')
 
-    # robot file path
-    xacro_file_path = os.path.join(package_share, 'urdf', 'qpbot.xacro')
-    urdf_file_path = os.path.join(package_share, 'urdf', 'qpbot.urdf')
+    # sub file path
+    urdf_dir = os.path.join(robot_description_dir, 'urdf')
+    rviz2_dir = os.path.join(robot_description_dir, 'rviz2')
+
+
+    xacro_file_path = os.path.join(urdf_dir, 'qpbot.xacro')
+    urdf_file_path = os.path.join(urdf_dir, 'qpbot.urdf')
 
     # convert xacro to urdf
     xacro_to_urdf = ExecuteProcess(
@@ -25,33 +27,39 @@ def generate_launch_description():
         output='screen'
     )
 
+    robot_file = LaunchConfiguration('robot_file')
+    robot_x = LaunchConfiguration('robot_x')
+    robot_y = LaunchConfiguration('robot_y')
+    robot_z = LaunchConfiguration('robot_z')
+    robot_a = LaunchConfiguration('robot_a')    
+    
     # declare arguments
-    gazebo_declare_robot = DeclareLaunchArgument(
-        name='robot',
-        default_value=urdf_file_path,
+    declare_robot_file_cmd =  DeclareLaunchArgument(
+        name='robot_file',
+        default_value=os.path.join(urdf_dir, 'qpbot.urdf'),
         description='Robot file to load for gazebo'
     )
 
-    gazebo_declare_robot_x = DeclareLaunchArgument(
+    declare_robot_x_cmd = DeclareLaunchArgument(
         name='robot_x',
         default_value='5.0',
         description='Robot x position'
     )
 
-    gazebo_declare_robot_y = DeclareLaunchArgument(
+    declare_robot_y_cmd = DeclareLaunchArgument(
         name='robot_y',
         default_value='1.0',
         description='Robot x position'
     )
 
-    gazebo_declare_robot_z = DeclareLaunchArgument(
+    declare_robot_z_cmd = DeclareLaunchArgument(
         name='robot_z',
         default_value='0.0',
         description='Robot x position'
     )
 
-    gazebo_declare_robot_yaw = DeclareLaunchArgument(
-        name='robot_yaw',
+    declare_robot_a_cmd = DeclareLaunchArgument(
+        name='robot_a',
         default_value='-3.1',
         description='Robot yaw'
     )
@@ -64,11 +72,11 @@ def generate_launch_description():
         output='screen', 
         arguments=[
             '-entity', 'qpbot',
-            '-file', LaunchConfiguration('robot'),
-            '-x', LaunchConfiguration('robot_x'),
-            '-y', LaunchConfiguration('robot_y'),
-            '-z', LaunchConfiguration('robot_z'),
-            '-Y', LaunchConfiguration('robot_yaw'),
+            '-file', robot_file,
+            '-x', robot_x,
+            '-y', robot_y,
+            '-z', robot_z,
+            '-Y', robot_a,
         ]
     )
 
@@ -88,16 +96,16 @@ def generate_launch_description():
         executable='rviz2',
         output='screen',
         arguments=[
-            '-d', os.path.join(package_share, 'rviz2', 'qpbot.rviz')
+            '-d', os.path.join(rviz2_dir, 'qpbot.rviz')
         ]
     )
 
     ld.add_action(xacro_to_urdf)
-    ld.add_action(gazebo_declare_robot)
-    ld.add_action(gazebo_declare_robot_x)
-    ld.add_action(gazebo_declare_robot_y)
-    ld.add_action(gazebo_declare_robot_z)
-    ld.add_action(gazebo_declare_robot_yaw)
+    ld.add_action(declare_robot_file_cmd)
+    ld.add_action(declare_robot_x_cmd)
+    ld.add_action(declare_robot_y_cmd)
+    ld.add_action(declare_robot_z_cmd)
+    ld.add_action(declare_robot_a_cmd)
     ld.add_action(spawn_robot)
     ld.add_action(state_publisher)
     

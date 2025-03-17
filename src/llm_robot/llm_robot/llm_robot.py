@@ -3,11 +3,11 @@ from rclpy.node import Node
 from my_interfaces.srv import Command
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
-#from turtlesim.msg import Pose
 from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
-
+from nav2_simple_commander.robot_navigator import BasicNavigator
+from copy import deepcopy
 
 class llmRobotNode(Node):
     def __init__(self, name):       
@@ -66,6 +66,7 @@ class llmRobotNode(Node):
             self.handle_request)
         self.get_logger().info("Service '/llm_nlp/cmd' has been created.")
 
+
     def init_joint_state(self):
         """
         initialize the joint state
@@ -113,20 +114,6 @@ class llmRobotNode(Node):
             # Publish joint state
             self.joint_state_publisher_.publish(self.joint_state)
             self.pub_rate.sleep()
-
-    # def pose_callback(self, msg):
-    #     """
-    #     get turtle pose
-
-    #     Args:
-    #         msg (Pose): the message from 'turtlebot' node
-        
-    #     Returns:
-    #         None
-    #     """
-
-    #     with self.lock:
-    #         self.current_pose = msg  
           
     def camera_callback(self, msg):
         """
@@ -138,8 +125,15 @@ class llmRobotNode(Node):
 
         with self.lock:
             self.recognized_goal = msg.data
-            self.get_logger().info("Recognized goal: {}".format(self.recognized_goal))  
-            
+            self.get_logger().info("Recognized goal: {}".format(self.recognized_goal))
+
+    
+    def navigator_init(self):
+        self.navigator = BasicNavigator()
+        self.navigator.waitUntilNav2Active()
+
+        
+
     def move_to_target(self, target_x, target_y, goal=""):
         """
         control the turtlebot to move to target
