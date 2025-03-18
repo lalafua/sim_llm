@@ -60,7 +60,7 @@ def generate_launch_description():
 
     declare_robot_a_cmd = DeclareLaunchArgument(
         name='robot_a',
-        default_value='-3.1',
+        default_value='0.0',
         description='Robot yaw'
     )
 

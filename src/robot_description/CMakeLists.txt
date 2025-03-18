@@ -15,7 +15,7 @@ find_package(cartographer REQUIRED)
 find_package(cartographer_ros REQUIRED)
 
 install(
-  DIRECTORY launch rviz2 urdf worlds models config
+  DIRECTORY launch rviz2 urdf worlds models config map
   DESTINATION share/${PROJECT_NAME}
 )
 
