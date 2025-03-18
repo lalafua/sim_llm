@@ -73,10 +73,6 @@ def generate_launch_description():
         arguments=[
             '-entity', 'qpbot',
             '-file', robot_file,
-            '-x', robot_x,
-            '-y', robot_y,
-            '-z', robot_z,
-            '-Y', robot_a,
         ]
     )
 

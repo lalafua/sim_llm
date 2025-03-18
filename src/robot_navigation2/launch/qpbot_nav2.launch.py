@@ -78,6 +78,14 @@ def generate_launch_description():
         }.items()
     )
 
+    rviz2_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', os.path.join(rviz2_dir, 'nav2_default_view.rviz')]
+    )
+
     ld.add_action(declare_map_file_cmd)
     ld.add_action(declare_param_file_cmd)
     ld.add_action(declare_use_sim_time_cmd)
@@ -85,6 +93,8 @@ def generate_launch_description():
     ld.add_action(declare_robot_y_cmd)
     ld.add_action(declare_robot_z_cmd)
     ld.add_action(declare_robot_a_cmd)
+    
     ld.add_action(nav2_bringup_launch)
+    ld.add_action(rviz2_node)
 
     return ld
