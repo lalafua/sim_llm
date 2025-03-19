@@ -29,6 +29,7 @@ setup(
             'llm_nlp = llm_robot.llm_nlp:main',
             'llm_robot = llm_robot.llm_robot:main',
             'camera = llm_robot.camera:main',
+            'test = llm_robot.test:main',
         ],
     },
 )

@@ -3,11 +3,11 @@ from rclpy.node import Node
 from my_interfaces.srv import Command
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
-#from turtlesim.msg import Pose
 from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
-
+from nav2_simple_commander.robot_navigator import BasicNavigator
+from copy import deepcopy
 
 class llmRobotNode(Node):
     def __init__(self, name):       
@@ -65,68 +65,6 @@ class llmRobotNode(Node):
             '/llm_nlp/cmd',
             self.handle_request)
         self.get_logger().info("Service '/llm_nlp/cmd' has been created.")
-
-    def init_joint_state(self):
-        """
-        initialize the joint state
-        """
-
-        self.joint_speed = [0.0, 0.0]
-        self.joint_state = JointState()
-        self.joint_state.header.stamp = self.get_clock().now().to_msg() 
-        self.joint_state.header.frame_id = "car_frame"
-        self.joint_state.name = ["left_wheel_joint", "right_wheel_joint"]
-        self.joint_state.position = [0.0, 0.0]
-        self.joint_state.velocity = self.joint_speed
-        self.joint_state.effort = []
-
-    def update_joint_speed(self, speed):
-        """
-        update the joint speed
-
-        Args:
-            speed (list): the speed of left and right wheels
-        """
-
-        self.joint_speed = speed
-
-    def thread_joint_state(self):
-        """
-        thread for controlling the joint state
-        """
-
-        last_time  = time.time()
-        while rclpy.ok():
-            delta_time =  time.time()-last_time
-            last_time = time.time()
-            
-            # Update joint state position
-            self.joint_state.position[0]  += delta_time*self.joint_state.velocity[0]
-            self.joint_state.position[1]  += delta_time*self.joint_state.velocity[1]
-            
-            # Update joint state velocity   
-            self.joint_state.velocity = self.joint_speed
-            
-            # Update header
-            self.joint_state.header.stamp = self.get_clock().now().to_msg()
-            
-            # Publish joint state
-            self.joint_state_publisher_.publish(self.joint_state)
-            self.pub_rate.sleep()
-
-    # def pose_callback(self, msg):
-    #     """
-    #     get turtle pose
-
-    #     Args:
-    #         msg (Pose): the message from 'turtlebot' node
-        
-    #     Returns:
-    #         None
-    #     """
-
-    #     with self.lock:
-    #         self.current_pose = msg  
           
     def camera_callback(self, msg):
         """
@@ -138,79 +76,13 @@ class llmRobotNode(Node):
 
         with self.lock:
             self.recognized_goal = msg.data
-            self.get_logger().info("Recognized goal: {}".format(self.recognized_goal))  
-            
-    def move_to_target(self, target_x, target_y, goal=""):
-        """
-        control the turtlebot to move to target
+            self.get_logger().info("Recognized goal: {}".format(self.recognized_goal))
 
-        Args:
-            target_x (float): target x
-            target_y (float): target y
-            goal (str): the goal to find
-        """
-        
-        target_pose = Pose()
-        target_pose.x = target_x
-        target_pose.y = target_y
-
-        while True:
-            if self.current_pose is not None:   
-                distance_x = target_pose.x - self.current_pose.x
-                distance_y = target_pose.y - self.current_pose.y
-                distance = math.sqrt(distance_x**2 + distance_y**2)
-                
-                if distance < 0.1:
-                    break
-                
-                angle = math.atan2(distance_y, distance_x)
-                angular_diff = angle - self.current_pose.theta  
-
-            # Rotate to the target direction
-            while abs(angular_diff) > 0.01:
-                if goal == self.recognized_goal:
-                    self.parser_success = True
-                    self.get_logger().info("Goal found at position: {}".format(self.current_pose))
-                    self.parser_event.set()
-                    return
-                angular_diff = angle - self.current_pose.theta
-                angular_diff = (angular_diff + math.pi) % (2 * math.pi) - math.pi
-                
-                self.vel_msg.linear.x = 0.0
-                self.vel_msg.angular.z = angular_diff
-                self.turtle_control_publisher_.publish(self.vel_msg)
-                time.sleep(0.1)
-
-            # Move straight to the target
-            while distance > 0.1:
-                if goal == self.recognized_goal:
-                    self.parser_success = True
-                    self.get_logger().info("Goal found at position: {}".format(self.current_pose))
-                    self.parser_event.set()
-                    return     
-                distance_x = target_pose.x - self.current_pose.x
-                distance_y = target_pose.y - self.current_pose.y
-                distance = math.sqrt(distance_x**2 + distance_y**2)
-                
-                self.vel_msg.linear.x = min(1.5, distance)
-                self.vel_msg.angular.z = 0.0
-                self.turtle_control_publisher_.publish(self.vel_msg)
-                time.sleep(0.1)
-        
-        self.stop()
-        self.get_logger().info("Turtle has reached {}".format(self.current_pose))
-        
-
-    def stop(self):
-        """
-        stop the turtlebot
-        """
-
-        self.vel_msg.linear.x = 0.0
-        self.vel_msg.angular.z = 0.0
-        self.turtle_control_publisher_.publish(self.vel_msg)
-        self.get_logger().info("Turtle has stopped.")
     
+    def navigator_init(self):
+        self.navigator = BasicNavigator()
+        self.navigator.waitUntilNav2Active()
+
 
     def handle_request(self, request, response):
         """

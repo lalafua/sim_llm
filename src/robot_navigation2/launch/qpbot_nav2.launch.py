@@ -17,11 +17,16 @@ def generate_launch_description():
 
     map_dir = os.path.join(robot_description_dir, 'map')
     param_dir = os.path.join(robot_navigation2_dir, 'param')
-    rviz2_dir = os.path.join(robot_navigation2_dir, 'rviz2')
+    rviz2_dir = os.path.join(nav2_bringup_dir, 'rviz')
 
     map_file = LaunchConfiguration('map_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
     param_file = LaunchConfiguration('param_file')
+
+    robot_x = LaunchConfiguration('robot_x')
+    robot_y = LaunchConfiguration('robot_y')
+    robot_z = LaunchConfiguration('robot_z')
+    robot_a = LaunchConfiguration('robot_a')
 
     declare_map_file_cmd = DeclareLaunchArgument(
         name='map_file',
@@ -40,6 +45,30 @@ def generate_launch_description():
         default_value=os.path.join(param_dir, 'qpbot_nav2.yaml')
     )
 
+    declare_robot_x_cmd = DeclareLaunchArgument(
+        name='robot_x',
+        default_value='5.0',
+        description='Robot x position'
+    )    
+
+    declare_robot_y_cmd = DeclareLaunchArgument(
+        name='robot_y',
+        default_value='1.0',
+        description='Robot y position'
+    )
+
+    declare_robot_z_cmd = DeclareLaunchArgument(
+        name='robot_z',
+        default_value='0.0',
+        description='Robot z position'
+    )
+
+    declare_robot_a_cmd = DeclareLaunchArgument(
+        name='robot_a',
+        default_value='0.0',
+        description='Robot yaw'
+    )
+
     nav2_bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')),
         launch_arguments={
@@ -49,10 +78,23 @@ def generate_launch_description():
         }.items()
     )
 
+    rviz2_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', os.path.join(rviz2_dir, 'nav2_default_view.rviz')]
+    )
+
     ld.add_action(declare_map_file_cmd)
     ld.add_action(declare_param_file_cmd)
     ld.add_action(declare_use_sim_time_cmd)
-
+    ld.add_action(declare_robot_x_cmd)
+    ld.add_action(declare_robot_y_cmd)
+    ld.add_action(declare_robot_z_cmd)
+    ld.add_action(declare_robot_a_cmd)
+    
     ld.add_action(nav2_bringup_launch)
+    ld.add_action(rviz2_node)
 
     return ld
