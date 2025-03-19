@@ -1,6 +1,5 @@
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult    
 import rclpy
-from rclpy.time import Time
 from rclpy.clock import Clock
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 
@@ -44,9 +43,9 @@ def main():
     navigator.setInitialPose(init_pose)
 
     patrol_poses = [
-        (-4.0, -3.0, 0),
-        (4.2, 7.4, 0),
-        (5.0, 1.0, 0)
+        (-4.0, -4.0, 0.0),
+        (4.0, -4.0, 0.0),
+        (4.0, 4.0, 0.0),
     ]
 
     goal_poses = []
@@ -61,7 +60,7 @@ def main():
             )
         )
 
-    navigator.goThroughPoses(goal_poses)
+    navigator.followWaypoints(goal_poses)
 
     while not navigator.isTaskComplete():
         feedback = navigator.getFeedback()
