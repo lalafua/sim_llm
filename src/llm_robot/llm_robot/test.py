@@ -1,51 +1,82 @@
-from nav2_simple_commander.robot_navigator import BasicNavigator
+from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult    
 import rclpy
-from geometry_msgs.msg import PoseStamped
-from copy import deepcopy
+from rclpy.time import Time
+from rclpy.clock import Clock
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 
+class PoseStampedFactory:
+    @classmethod
+    def create_pose(cls, frame_id, x, y, z, qx=0.0, qy=0.0, qz=0.0, qw=1.0):
+        """
+        Create PoseStamped message.
+
+        Args:
+            frame_id (str): frame id.
+            x, y, z (float): coordinates.
+            qx, qy, qz, qw (float): quaternion.
+
+        Returns:
+            PoseStamped: PoseStamped message.
+        """
+        pose_msg = Pose(
+            position=Point(x=x, y=y, z=z),
+            orientation=Quaternion(x=qx, y=qy, z=qz, w=qw)
+        )
+
+        pose_stamped = PoseStamped()
+        pose_stamped.header.frame_id = frame_id
+        pose_stamped.header.stamp = Clock().now().to_msg()
+        pose_stamped.pose = pose_msg
+        return pose_stamped
 
 def main():
     rclpy.init()
     navigator = BasicNavigator()
     navigator.waitUntilNav2Active()
 
-    init_pose = PoseStamped()
-    init_pose.header.frame_id = 'map'
-    init_pose.header.stamp = navigator.get_clock().now().to_msg()
-    init_pose.pose.position.x = 0.0
-    init_pose.pose.position.y = 0.0
-    init_pose.pose.orientation.z = 0.0
-    init_pose.pose.orientation.w = 1.0
+    init_pose = PoseStampedFactory.create_pose(
+        frame_id='map',
+        x=0.0,
+        y=0.0,
+        z=0.0,
+        )
 
     navigator.setInitialPose(init_pose)
 
-    partrol_pose = [
-        (-4.0, -3.0, 0.0),
-        (4.2, 7.4, 0.0),
-        (5.0, 1.0, 0.0)
+    patrol_poses = [
+        (-4.0, -3.0, 0),
+        (4.2, 7.4, 0),
+        (5.0, 1.0, 0)
     ]
 
-    goal_pose = deepcopy(init_pose)
+    goal_poses = []
 
-    for pose in partrol_pose:
-        goal_pose.pose.position.x = pose[0]
-        goal_pose.pose.position.y = pose[1]
+    for pose in patrol_poses:
+        goal_poses.append(
+            PoseStampedFactory.create_pose(
+                frame_id='map',
+                x=pose[0],
+                y=pose[1],
+                z=pose[2],
+            )
+        )
 
-        # 关键修改：将 navigator.goToPose() 移动到 for 循环内部!**
-        navigator.goToPose(goal_pose)  # 每次循环都发送新的导航目标
+    navigator.goThroughPoses(goal_poses)
 
-        while not navigator.isTaskComplete():
-            feedback = navigator.getFeedback()
-            if feedback and feedback.navigation_state != 'IDLE':
-                print(f"当前导航状态: {feedback.navigation_state}")
-
-        result = navigator.getResult()
-        if result == BasicNavigator.RESULT_SUCCEEDED:
-            print('到达目标点!')
-        elif result == BasicNavigator.RESULT_CANCELED:
-            print('导航被取消!')
-        elif result == BasicNavigator.RESULT_FAILED:
-            print('导航失败!')
+    while not navigator.isTaskComplete():
+        feedback = navigator.getFeedback()
+        if feedback.navigation_duration > 600:
+            navigator.cancelTask()
+    
+    result = navigator.getResult()
+    if result == TaskResult.SUCCESS:
+        print("Task completed successfully.")
+    elif result == TaskResult.CANCELED:
+        print("Task canceled.") 
+    elif result == TaskResult.FAILURE:
+        print("Task failed.")   
+    else:
+        print("Unknown result.")    
 
     navigator.destroy_node()
     rclpy.shutdown()
