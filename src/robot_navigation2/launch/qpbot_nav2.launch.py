@@ -8,6 +8,8 @@ from launch_ros.actions import Node
 
 package_name = 'robot_navigation2'
 
+ENABLE_RVIZ2 = False
+
 def generate_launch_description():
     ld = LaunchDescription()
     
@@ -95,6 +97,8 @@ def generate_launch_description():
     ld.add_action(declare_robot_a_cmd)
     
     ld.add_action(nav2_bringup_launch)
-    ld.add_action(rviz2_node)
+
+    if ENABLE_RVIZ2:
+        ld.add_action(rviz2_node)
 
     return ld

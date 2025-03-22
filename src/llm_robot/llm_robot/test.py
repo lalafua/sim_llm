@@ -4,7 +4,7 @@ from rclpy.clock import Clock
 import tf2_ros
 from tf2_ros import LookupException, ConnectivityException, ExtrapolationException  
 
-from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion, PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 
 class PoseStampedFactory:
     @classmethod

@@ -7,6 +7,8 @@ from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from nav2_simple_commander.robot_navigator import BasicNavigator
+import tf2_ros  
+from tf2_ros import LookupException, ConnectivityException, ExtrapolationException  
 
 class llmRobotNode(Node):
     def __init__(self, name):       
@@ -76,36 +78,35 @@ class llmRobotNode(Node):
             )
         )
 
-        # Get real-time acml pose
-        self.pose_subscriber_ = self.create_subscription(
-            msg_type=PoseStamped,
-            topic="/amcl_pose",
-            callback=self.pose_callback,
-            qos_profile=10,
-        )
+        self.tf2_buffer = tf2_ros.Buffer()
+        self.tf2_listener = tf2_ros.TransformListener(self.tf2_buffer, self)
 
-    def pose_callback(self, msg):
-        """
-        callback function to handle the message from 'amcl_pose' topic
 
-        Args:
-            msg (PoseStamped): the message from 'amcl_pose' topic
-        """
-
-        with self.lock:
-            self.current_pose = msg
-            self.get_logger().info("Current pose: {}".format(self.current_pose))
-    
     def get_current_pose(self):
         """
-        get the current pose
+        ise tf2 get the current pose from 'map' to 'base_footprint'
 
         Returns:
-            PoseStamped: the current pose
+            dict: the current pose
         """
 
-        return self.current_pose
+        try:
+            transform = self.tf2_buffer.lookup_transform(
+                target_frame='base_footprint',
+                source_frame='map',  
+                time=rclpy.time.Time(),
+                timeout=rclpy.time.Duration(seconds=0.5)    
+            )
 
+            x = transform.transform.translation.x
+            y = transform.transform.translation.y
+            z = transform.transform.translation.z
+
+            return (x, y, z)
+
+        except (LookupException, ConnectivityException, ExtrapolationException) as e:
+            self.get_logger().error(str(e))
+            return None
 
     def create_pose(self, frame_id, x, y, z, qx=0.0, qy=0.0, qz=0.0, qw=1.0):
         """
@@ -232,6 +233,8 @@ class llmRobotNode(Node):
             (0.0, 0.0, 0.0),
         ]
 
+        goal_pose_stamped = None
+
         waypoints_pose = []
 
         for pose in patrol_poses:
@@ -243,52 +246,59 @@ class llmRobotNode(Node):
                     z=pose[2],
                 )
             )
-    
-        # Send waypoints pose to navigator
-        def send_waypoints():
-            self.nav_start = self.get_clock().now()
-            self.navigator.followWaypoints(waypoints_pose)
 
-        def is_goal_detected():
-            return self.get_recognized_goal() == goal
-        
-        i = 0
-        while not self.navigator.isTaskComplete():
-            i = i + 1
-            feedback = self.navigator.getFeedback()
-            if feedback and i%5 == 0:
-                self.get_logger().info(
-                    'Executing current waypoint:\n'
-                    + str(feedback.current_waypoint + 1)
-                    + '/'
-                    + str(len(waypoints_pose))
-                    + '\n'
-                    + str(self.get_current_pose())
-                )
-            
-                now = self.get_clock().now()
+        while True:
+            self.get_logger().info("Searching for goal: {}, start new patrol circle.".format(goal))
+            self.navigator.followWaypoints(waypoints_pose)
+            self.nav_start = self.get_clock().now()
+
+
+            i = 0
+            is_goal_detected_in_cycle = False
+
+            while not self.navigator.isTaskComplete():
+                i = i + 1
+                feedback = self.navigator.getFeedback()
+                if feedback and i%5 == 0:
+                    self.get_logger().info(
+                        '\nExecuting current waypoint:\n'
+                        + str(feedback.current_waypoint + 1)
+                        + '/'
+                        + str(len(waypoints_pose))
+                        + '\n'
+                        + str(self.get_current_pose())
+                    )
+                
+                    now = self.get_clock().now()
 
                 if now - self.nav_start > Duration(seconds=600.0):
-                    self.get_logger().error("Navigation timeout.")
-                    self.cancel_navigation()
-
-            if is_goal_detected():
-                self.get_logger().info("Goal detected.")
-                self.parser_success = True
-                self.cancel_navigation()   
-                
+                    self.get_logger().error("Navigation timeout during patrol cycle.")
                     
-                
-        
-        result = self.navigator.getResult()
-        if result == self.TaskResult.SUCCESS:
-            self.get_logger("Task completed successfully.")
-        elif result == self.TaskResult.CANCELED:
-            self.get_logger("Task canceled.") 
-        elif result == self.TaskResult.FAILURE:
-            self.get_logger("Task failed.")   
-        else:
-            self.get_logger("Unknown result.")    
+                    self.cancel_navigation()
+                    break
+
+                if goal == self.get_recognized_goal():
+                    self.get_logger().info("Goal {} detected.".format(goal))
+                    self.parser_success = True
+                    is_goal_detected_in_cycle = True
+                    goal_pose_stamped = self.get_current_pose() 
+                    
+                    self.cancel_navigation()   
+                    break
+            
+            if is_goal_detected_in_cycle:
+                self.get_logger().info("Returning to origin after finding goal.")
+                self.get_logger().info("Goal pose: {}".format(goal_pose_stamped))
+                self.navigator.followWaypoints([waypoints_pose[len(waypoints_pose) - 1]]) 
+
+                while not self.navigator.isTaskComplete():
+                    pass
+
+                self.parser_event.set()
+
+                self.get_logger().info("Returning to origin completed.")  
+
+                return
             
 
 def main(args=None):
