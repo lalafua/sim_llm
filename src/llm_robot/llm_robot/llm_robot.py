@@ -1,13 +1,14 @@
-import rclpy, json, math, time,threading    
+import rclpy, json, threading    
 from rclpy.node import Node
+from rclpy.duration import Duration 
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion  
 from my_interfaces.srv import Command
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import JointState
 from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from nav2_simple_commander.robot_navigator import BasicNavigator
-from copy import deepcopy
+import tf2_ros  
+from tf2_ros import LookupException, ConnectivityException, ExtrapolationException  
 
 class llmRobotNode(Node):
     def __init__(self, name):       
@@ -16,56 +17,27 @@ class llmRobotNode(Node):
 
         self.callback_group_ = MutuallyExclusiveCallbackGroup()
 
-        self.joint_state_publisher_ = self.create_publisher(
-            JointState,
-            "/joint_states",
-            10,
-        )
-        self.init_joint_state()
-        self.pub_rate = self.create_rate(30)
-        threading.Thread(target=self.thread_joint_state).start()
-
-        # # Create subscriber to get turtle pose
-        # self.turtle_pose_subscription_ = self.create_subscription(
-        #     Pose,
-        #     '/turtle1/pose',
-        #     self.pose_callback,
-        #     10,
-        #     callback_group=self.callback_group_)    
-        # self.get_logger().info("Node has subscribed to '/turtle1/pose' ")
-
-        # Create subscriber to get camera message   
-        self.camera_subscriber_ = self.create_subscription(
-            String,
-            "/camera/recognized",
-            self.camera_callback,
-            10,
-            callback_group=self.callback_group_)    
-        self.get_logger().info("Node has subscribed to '/camera/recognized' ")  
-
         self.lock = threading.Lock()
 
-        # # Create publisher to control turtle
-        # self.turtle_control_publisher_ = self.create_publisher(
-        #     Twist,
-        #     '/turtle1/cmd_vel',
-        #     10)
-        # self.get_logger().info("Publisher 'cmd_vel' has been created.")
-        # self.vel_msg = Twist()
-        # self.current_pose = Pose()
-        # self.recognized_goal = ""
+        self.camera_init()  
+        self.navigator_init()   
+        self.parser_init()
 
-        self.parser_success = False
-        self.parser_thread = None
-        self.parser_event = threading.Event()
+    def camera_init(self):
+        """
+        Initialize the camera subscriber
+        """
 
-        # Create server to receive command
-        self.command_server_ = self.create_service(
-            Command,
-            '/llm_nlp/cmd',
-            self.handle_request)
-        self.get_logger().info("Service '/llm_nlp/cmd' has been created.")
-          
+        self.camera_subscriber_ = self.create_subscription(
+            msg_type=String,
+            topic="/camera/recognized",
+            callback=self.camera_callback,
+            qos_profile=10,
+            callback_group=self.callback_group_
+        )    
+        self.get_logger().info("Node has subscribed to '/camera/recognized' ")  
+
+
     def camera_callback(self, msg):
         """
         callback function to handle the message from 'camera' node
@@ -77,12 +49,111 @@ class llmRobotNode(Node):
         with self.lock:
             self.recognized_goal = msg.data
             self.get_logger().info("Recognized goal: {}".format(self.recognized_goal))
-
     
+    def get_recognized_goal(self):
+        """
+        get the recognized goal
+
+        Returns:
+            str: the recognized goal
+        """
+
+        return self.recognized_goal
+
     def navigator_init(self):
+        """
+        Initialize the navigator
+        """
+
         self.navigator = BasicNavigator()
+        # Wait until nav2 is active 
         self.navigator.waitUntilNav2Active()
 
+        self.navigator.setInitialPose(
+            self.create_pose(
+                frame_id='map',
+                x=0.0,
+                y=0.0,
+                z=0.0   
+            )
+        )
+
+        self.tf2_buffer = tf2_ros.Buffer()
+        self.tf2_listener = tf2_ros.TransformListener(self.tf2_buffer, self)
+
+
+    def get_current_pose(self):
+        """
+        ise tf2 get the current pose from 'map' to 'base_footprint'
+
+        Returns:
+            dict: the current pose
+        """
+
+        try:
+            transform = self.tf2_buffer.lookup_transform(
+                target_frame='base_footprint',
+                source_frame='map',  
+                time=rclpy.time.Time(),
+                timeout=rclpy.time.Duration(seconds=0.5)    
+            )
+
+            x = transform.transform.translation.x
+            y = transform.transform.translation.y
+            z = transform.transform.translation.z
+
+            return (x, y, z)
+
+        except (LookupException, ConnectivityException, ExtrapolationException) as e:
+            self.get_logger().error(str(e))
+            return None
+
+    def create_pose(self, frame_id, x, y, z, qx=0.0, qy=0.0, qz=0.0, qw=1.0):
+        """
+        Create PoseStamped message.
+
+        Args:
+            frame_id (str): frame id.
+            x, y, z (float): coordinates.
+            qx, qy, qz, qw (float): quaternion.
+
+        Returns:
+            PoseStamped: PoseStamped message.
+        """
+        pose_msg = Pose(
+            position=Point(x=x, y=y, z=z),
+            orientation=Quaternion(x=qx, y=qy, z=qz, w=qw)
+        )
+
+        pose_stamped = PoseStamped()
+        pose_stamped.header.frame_id = frame_id
+        pose_stamped.header.stamp = self.get_clock().now().to_msg()
+        pose_stamped.pose = pose_msg
+        return pose_stamped
+    
+    def cancel_navigation(self):
+        """
+        cancel the navigation
+        """
+
+        self.navigator.cancelTask()
+
+    def parser_init(self):
+        """
+        Initialize the parser commander
+        """
+
+        self.parser_success = False
+        self.parser_thread = None
+        self.parser_event = threading.Event()
+
+        # Create server to receive command
+        self.command_server_ = self.create_service(
+            srv_type=Command,
+            srv_name='/llm_nlp/cmd',
+            callback=self.handle_request
+        )
+        self.get_logger().info("Service '/llm_nlp/cmd' has been created.")
 
     def handle_request(self, request, response):
         """
@@ -154,35 +225,81 @@ class llmRobotNode(Node):
         self.parser_success = False 
         self.parser_event.clear()
 
-        # Define fixed patrol points
-        patrol_points = [
-            (1.0, 1.0),
-            (9.0, 1.0),
-            (9.0, 9.0),
-            (1.0, 9.0)
+        # Define fixed patrol poses
+        patrol_poses = [
+            (-4.0, -4.0, 0.0),
+            (4.0, -4.0, 0.0),
+            (4.0, 4.0, 0.0),
+            (0.0, 0.0, 0.0),
         ]
+
+        goal_pose_stamped = None
+
+        waypoints_pose = []
+
+        for pose in patrol_poses:
+            waypoints_pose.append(
+                self.create_pose(
+                    frame_id='map',
+                    x=pose[0],
+                    y=pose[1],
+                    z=pose[2],
+                )
+            )
+
+        while True:
+            self.get_logger().info("Searching for goal: {}, start new patrol circle.".format(goal))
+            self.navigator.followWaypoints(waypoints_pose)
+            self.nav_start = self.get_clock().now()
+
+
+            i = 0
+            is_goal_detected_in_cycle = False
+
+            while not self.navigator.isTaskComplete():
+                i = i + 1
+                feedback = self.navigator.getFeedback()
+                if feedback and i%5 == 0:
+                    self.get_logger().info(
+                        '\nExecuting current waypoint:\n'
+                        + str(feedback.current_waypoint + 1)
+                        + '/'
+                        + str(len(waypoints_pose))
+                        + '\n'
+                        + str(self.get_current_pose())
+                    )
+                
+                    now = self.get_clock().now()
+
+                if now - self.nav_start > Duration(seconds=600.0):
+                    self.get_logger().error("Navigation timeout during patrol cycle.")
+                    
+                    self.cancel_navigation()
+                    break
+
+                if goal == self.get_recognized_goal():
+                    self.get_logger().info("Goal {} detected.".format(goal))
+                    self.parser_success = True
+                    is_goal_detected_in_cycle = True
+                    goal_pose_stamped = self.get_current_pose() 
+                    
+                    self.cancel_navigation()   
+                    break
             
-        # Store the original position
-        original_position = (self.current_pose.x, self.current_pose.y)
-        self.get_logger().info("Original position: {}".format(original_position))   
+            if is_goal_detected_in_cycle:
+                self.get_logger().info("Returning to origin after finding goal.")
+                self.get_logger().info("Goal pose: {}".format(goal_pose_stamped))
+                self.navigator.followWaypoints([waypoints_pose[len(waypoints_pose) - 1]]) 
 
-        def patrol():
-            while not self.parser_success:
-                for point in patrol_points:
-                    if self.parser_success:
-                        break
-                    self.move_to_target(point[0], point[1], goal)
+                while not self.navigator.isTaskComplete():
+                    pass
 
-                if not self.parser_success:
-                    self.get_logger().info("Goal not found, continuing patrol.")
+                self.parser_event.set()
 
-            # If goal is found, return to the original position
-            self.move_to_target(original_position[0], original_position[1])
-            self.get_logger().info("Returned to original position.")
+                self.get_logger().info("Returning to origin completed.")  
 
-        # Start patrol in a new thread
-        self.patrol_thread = threading.Thread(target=patrol)
-        self.patrol_thread.start()
+                return
+            
 
 def main(args=None):
     rclpy.init(args=args)

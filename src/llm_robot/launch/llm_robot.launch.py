@@ -1,50 +1,57 @@
 import os
 from launch import LaunchDescription    
-from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
+from ament_index_python.packages import get_package_share_directory
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+package_name = 'llm_robot'
 
 def generate_launch_description():
-    
-    package_name = "llm_robot"
-    car_model_name = "car_base.urdf"
-    rviz_config_name = "llm_robot.rviz"
-    
     ld = LaunchDescription()
 
-    pkg_share = FindPackageShare(package=package_name).find(package_name)
-    
-    camera_node = Node(
-        package="llm_robot",
-        executable="camera",
-        name="camera",
-    )
+    llm_robot_dir = get_package_share_directory(package_name='llm_robot')
+    robot_description_dir = get_package_share_directory(package_name='robot_description')
+    robot_navigation2_dir = get_package_share_directory(package_name='robot_navigation2') 
 
+
+    # Launch llm_robot to control the robot 
     llm_robot_node = Node(
-        package="llm_robot",
-        executable="llm_robot",
-        name="llm_robot",
+        name='llm_robot',   
+        package='llm_robot',
+        executable='llm_robot',
     )
 
-    robot_state_publisher_node = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        name="robot_state_publisher",
-        arguments=[os.path.join(pkg_share, "urdf/{}".format(car_model_name))],
+    # Launch camera node to recognize the goal
+    camera_node = Node(
+        name='camera',
+        package='llm_robot',
+        executable='camera',    
     )
 
-    rviz_node = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        arguments=["-d", os.path.join(pkg_share, "rviz/{}".format(rviz_config_name))],
+    # Launch llm_nlp node to process neutral language
+    llm_nlp_node = Node(
+        name='llm_nlp',
+        package='llm_robot',
+        executable='llm_nlp',
     )
 
-    #ld.add_action(camera_node)
+    # Launch the robot spawn to spawn the robot in the gazebo world 
+    robot_spawn_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(robot_description_dir, 'launch', 'robot_spawn.launch.py'))
+    )
+
+    # Launch the robot navigation2 to start navigation2 map server and planner server
+    robot_nav2_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(robot_navigation2_dir, 'launch', 'qpbot_nav2.launch.py'))
+    )
+
     ld.add_action(llm_robot_node)
-    ld.add_action(robot_state_publisher_node)
-    ld.add_action(rviz_node)
-     
+    ld.add_action(camera_node)
+    ld.add_action(llm_nlp_node) 
+    ld.add_action(robot_spawn_launch)
+    ld.add_action(robot_nav2_launch)
+
     return ld
 
 
