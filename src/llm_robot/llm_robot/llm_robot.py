@@ -1,4 +1,6 @@
-import rclpy, json, threading    
+import rclpy
+import json
+import threading    
 from rclpy.node import Node
 from rclpy.duration import Duration 
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion  
@@ -305,7 +307,6 @@ def main(args=None):
     rclpy.init(args=args)
 
     node = llmRobotNode("llm_robot")
-    node.update_joint_speed([15.0, -15.0])
     executor = MultiThreadedExecutor()
     executor.add_node(node)
 
