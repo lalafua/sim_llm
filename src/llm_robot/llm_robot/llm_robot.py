@@ -36,7 +36,10 @@ class llmRobotNode(Node):
             callback=self.camera_callback,
             qos_profile=10,
             callback_group=self.callback_group_
-        )    
+        )
+
+        self.recognized_goal = None 
+
         self.get_logger().info("Node has subscribed to '/camera/recognized' ")  
 
 
@@ -148,6 +151,7 @@ class llmRobotNode(Node):
         self.parser_success = False
         self.parser_thread = None
         self.parser_event = threading.Event()
+        self.parser_event.clear()
 
         # Create server to receive command
         self.command_server_ = self.create_service(
@@ -224,7 +228,6 @@ class llmRobotNode(Node):
             goal (str): the goal to find
         """
    
-        self.parser_success = False 
         self.parser_event.clear()
 
         # Define fixed patrol poses
@@ -252,28 +255,27 @@ class llmRobotNode(Node):
         while True:
             self.get_logger().info("Searching for goal: {}, start new patrol circle.".format(goal))
             self.navigator.followWaypoints(waypoints_pose)
-            self.nav_start = self.get_clock().now()
-
+            nav_start = self.get_clock().now()
 
             i = 0
             is_goal_detected_in_cycle = False
-
+            
             while not self.navigator.isTaskComplete():
                 i = i + 1
+                now = self.get_clock().now()
                 feedback = self.navigator.getFeedback()
                 if feedback and i%5 == 0:
                     self.get_logger().info(
-                        '\nExecuting current waypoint:\n'
+                        '\nExecuting current waypoint: '
                         + str(feedback.current_waypoint + 1)
                         + '/'
                         + str(len(waypoints_pose))
                         + '\n'
+                        + 'Current pose: '
                         + str(self.get_current_pose())
                     )
-                
-                    now = self.get_clock().now()
-
-                if now - self.nav_start > Duration(seconds=600.0):
+            
+                if now - nav_start > Duration(seconds=600.0):
                     self.get_logger().error("Navigation timeout during patrol cycle.")
                     
                     self.cancel_navigation()
@@ -281,7 +283,6 @@ class llmRobotNode(Node):
 
                 if goal == self.get_recognized_goal():
                     self.get_logger().info("Goal {} detected.".format(goal))
-                    self.parser_success = True
                     is_goal_detected_in_cycle = True
                     goal_pose_stamped = self.get_current_pose() 
                     
@@ -295,10 +296,11 @@ class llmRobotNode(Node):
 
                 while not self.navigator.isTaskComplete():
                     pass
+                
+                self.parser_success = True
+                self.get_logger().info("Returning to origin completed.") 
 
                 self.parser_event.set()
-
-                self.get_logger().info("Returning to origin completed.")  
 
                 return
             
