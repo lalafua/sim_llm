@@ -205,7 +205,7 @@ class llmRobotNode(Node):
         print(commands) 
         
         command_map = {
-            "find": lambda parms : self.find(parms["goal"])
+            "find": lambda parms : self.find(parms["object"])
         }
 
         for item in commands:

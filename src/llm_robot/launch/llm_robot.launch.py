@@ -48,7 +48,7 @@ def generate_launch_description():
 
     ld.add_action(llm_robot_node)
     ld.add_action(camera_node)
-    ld.add_action(llm_nlp_node) 
+    #ld.add_action(llm_nlp_node) 
     ld.add_action(robot_spawn_launch)
     ld.add_action(robot_nav2_launch)
 
