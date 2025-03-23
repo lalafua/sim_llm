@@ -107,7 +107,7 @@ class llmRobotNode(Node):
             y = transform.transform.translation.y
             z = transform.transform.translation.z
 
-            return (x, y, z)
+            return (f'{x:.3f}', f'{y:.3f}', f'{z:.3f}')
 
         except (LookupException, ConnectivityException, ExtrapolationException) as e:
             self.get_logger().error(str(e))
@@ -291,14 +291,20 @@ class llmRobotNode(Node):
             
             if is_goal_detected_in_cycle:
                 self.get_logger().info("Returning to origin after finding goal.")
-                self.get_logger().info("Goal pose: {}".format(goal_pose_stamped))
+                
                 self.navigator.followWaypoints([waypoints_pose[len(waypoints_pose) - 1]]) 
 
                 while not self.navigator.isTaskComplete():
+                    self.get_logger().info(
+                        'Returning...... \n'
+                        + 'Current pose: '
+                        + str(self.get_current_pose())
+                    )
                     pass
                 
                 self.parser_success = True
-                self.get_logger().info("Returning to origin completed.") 
+                self.get_logger().info("Returning to origin completed.")
+                self.get_logger().info(f"Goal {goal} positon: {goal_pose_stamped}")
 
                 self.parser_event.set()
 
