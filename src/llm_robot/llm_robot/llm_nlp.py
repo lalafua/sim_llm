@@ -1,5 +1,7 @@
 from openai import OpenAI
-import rclpy, os, threading
+import rclpy
+import os
+import threading
 from rclpy.node import Node
 from my_interfaces.srv import Command
 from rclpy.executors import MultiThreadedExecutor
