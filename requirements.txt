@@ -1,0 +1,13 @@
+ament_index_python==1.4.0
+geometry_msgs==4.2.4
+launch_ros==0.19.8
+nav2_common==1.1.18
+nav2_simple_commander==1.0.0
+openai==1.68.2
+opencv_python==4.11.0.86
+rclpy==3.3.15
+rosidl_parser==3.1.6
+setuptools==59.6.0
+std_msgs==4.2.4
+tf2_ros_py==0.25.12
+ultralytics==8.3.91
