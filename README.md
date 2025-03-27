@@ -11,8 +11,10 @@
 
 改动主要是适配 ROS1 -> ROS2 的功能包切换升级，顶层控制逻辑并没有改变
 
-### DEMO
-  
+### Demo
+
+![demo](./assets/demo_ROS2.webm)
+
 ### 顶层逻辑
 
 顶层任务逻辑分三个 `node` 完成：
@@ -22,8 +24,6 @@
 - `camera node` ：识别节点。从摄像头捕获图像，使用 Roboflow 模型进行物体检测，然后将检测结果发布到 `/camera/recognized`。为了缓解识别图像造成的卡顿掉帧，通过多线程处理捕获操作和帧操作，同时也可以避免阻塞定时器的回调任务。
 
 - `llm_robot node` ：控制节点。通过 TF Tree ：`map -> base_footprint` 的变换关系，获得机器人的实时坐标；订阅 `camera` 节点发布的 `/camera/recognized` 识别的目标信息；使用 `nav2_simple_commander.robot_navigator` 的 `BasicNavigator` 类，执行简单的导航任务。
-  
-![](assets/rosgraph.png)  
   
 ### 参考
 - TF2
@@ -106,5 +106,31 @@ ros2 launch llm_robot llm_robot.launch.py
 
 ![](./run/bottle_20250327-125407.jpg)
   
-  
-  
+## 二次开发
+
+得益于 ROS2 优秀的设计架构和技术，我们可以很轻松的在此项目的基础上进行二次开发。
+
+在本项目中
+- `llm_robot` 为项目的顶层包
+    - llm_nlp.py 中包含用于引导 AI 解析自然语言的 Prompt 
+    - llm_robot.py 提供了最高抽象的控制逻辑，如果想要修改机器人的行为逻辑可以从此入手
+
+- `my_interfaces` 定义了一组接口，用于 node 之间的请求传递
+
+- `robot_description` 有以下几个功能：
+    - robot_spawn.launch.py 启动 gazebo 加载地图场景文件并通过启动 qpbot.launch.py 的方式加载机器人
+    - cartographer.launch.py 启动建图任务，因此只在初期会用到
+
+- `robot_navigation2` 用于载入 cartographer 创建的地图文件并启动导航服务器
+
+![节点关系](./assets/rosgraph.png)
+
+
+
+
+
+
+
+
+
+
