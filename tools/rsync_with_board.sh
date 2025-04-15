@@ -18,6 +18,7 @@ EXCLUDE_OPTS=(
   --exclude '.vscode/' \
   --exclude '.idea/' \
   --exclude '*.swp' \
+  --exclude '.venv/' \
 )
 
 if [ -z "$1" ]; then
@@ -37,8 +38,8 @@ fi
 declare -a FINAL_OPTS=()           
 FINAL_OPTS+=( "${RSYNC_OPTS[@]}" )  
 
-if [[ -n "$DRY_RUN_FLAG" ]]; then
-  FINAL_OPTS+=( "$DRY_RUN_FLAG" ) 
+if [[ -n "$DRY_RUN_OPT" ]]; then
+  FINAL_OPTS+=( "$DRY_RUN_OPT" ) 
 fi
 
 FINAL_OPTS+=( "${EXCLUDE_OPTS[@]}" )
@@ -51,7 +52,7 @@ case "$ACTION" in
 
   pull)
     echo "pulling from board..."
-    rsync "${FINAL_OPTS[@]}" "$local_dir" "$remote_source" 
+    rsync "${FINAL_OPTS[@]}" "$remote_target" "$local_dir"  
     ;;
   *)
     echo "error: invailed operation '$ACTION'."

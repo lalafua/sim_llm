@@ -5,4 +5,4 @@ log/
 .venv/
 *.log
 *.pyc
-
+riscv/
