@@ -111,7 +111,7 @@ class NLPNode(Node):
         }
         payload = {
             "model": "deepseek-chat",
-            "message": [
+            "messages": [
                 {
                     "role": "system",
                     "content": PROMPT
