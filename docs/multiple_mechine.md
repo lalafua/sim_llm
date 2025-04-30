@@ -66,4 +66,4 @@
     ![](../assets/docs/picture_06.png)
 
     演示视频：
-    [demo_mutilpe_mechine](../assets/demo_mutliple_mechine.webm)
+    [demo_multiple_mechine](../assets/demo_multiple_mechine.webm)
